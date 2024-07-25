@@ -2,11 +2,12 @@
 #'
 #' @param target_ts a `data.frame` of target data in a time series format
 #'   (contains columns `time_index`, `location`, and `observation`)
-#' @param transformation string specifying the transformation used to create
-#'   the model; can be one of "none" or "sqrt".
-#' @param symmetrize boolean specifying whether to symmetrize the model; can be
-#'   one of `TRUE` or `FALSE`.
-#' @param window_size integer specifying the window size used to create the model
+#' @param transformation string specifying the transformation used on the
+#'   distribution which determines its shape; can be one of "none" or "sqrt".
+#' @param symmetrize boolean specifying whether to make the distribution symmetric;
+#'   can be one of `TRUE` or `FALSE`.
+#' @param window_size integer specifying how many previous observations in the
+#'   target data should be used to inform the forecasts
 #' @param effective horizons numeric vector of prediction horizons relative to
 #'   the last observed date in `target_ts`
 #' @param origin string specifying the origin to use when making predictions;
@@ -58,13 +59,13 @@ get_baseline_predictions_new <- function(target_ts,
   )
 
   # predict
-  predictions <- predict(
-    baseline_fit,
-    nsim = ifelse(is.null(n_samples), 100000, n_samples),
-    horizon = max(effective_horizons),
-    origin = origin,
-    force_nonneg = TRUE
-  )
+  predictions <- baseline_fit |>
+    predict(
+      nsim = ifelse(is.null(n_samples), 100000, n_samples),
+      horizon = max(effective_horizons),
+      origin = origin,
+      force_nonneg = TRUE
+    )
 
   # truncate to non-negative
   # AG: wondering what the correct order of operations is here
