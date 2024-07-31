@@ -9,7 +9,7 @@
 #' `model_variations` are as follows:
 #'   - transformation (character): "none" or "sqrt"
 #'   - symmetric (boolean)
-#'   - window_size (numeric)
+#'   - window_size (numeric): a non-negative integer
 #'
 #' @return validated model_variations `data.frame` with the following columns:
 #'   `transformation`, `symmetrize`, and `window_size`
@@ -36,8 +36,9 @@ validate_model_variations <- function(model_variations) {
   if (!inherits(model_variations$symmetrize, "logical")) {
     cli::cli_abort("{.arg symmetrize} must only contain logical values, e.g. TRUE or FALSE.")
   }
-  if (!all(model_variations$window_size == trunc(model_variations$window_size))) {
-    cli::cli_abort("{.arg window_size} must only contain integer values.")
+  if (!all(model_variations$window_size == trunc(model_variations$window_size)) ||
+        all(model_variations$window_size < 0)) {
+    cli::cli_abort("{.arg window_size} must only contain non-negative integer values.")
   }
 
   return(model_variations)
@@ -58,7 +59,9 @@ validate_target_ts <- function(target_ts) {
   if (!all(target_col %in% actual_col)) {
     cli::cli_abort("{.arg target_ts} is missing the column{?s}: {.val {setdiff(target_col, actual_col)}}.")
   } else if (!all(actual_col %in% target_col) && all(target_col %in% actual_col)) {
-    cli::cli_abort(c(x = "{.arg target_ts} contains the extra column{?s}: {.val {setdiff(actual_col, target_col)}}.",
-                     i = "Double check that your target data does not contain duplicate rows when removing columns."))
+    cli::cli_abort(c(
+      x = "{.arg target_ts} contains the extra column{?s}: {.val {setdiff(actual_col, target_col)}}.",
+      i = "Double check that your target data does not contain duplicate rows when removing columns."
+    ))
   }
 }
