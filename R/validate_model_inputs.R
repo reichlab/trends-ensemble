@@ -9,31 +9,38 @@
 #' `model_variations` are as follows:
 #'   - transformation (character): "none" or "sqrt"
 #'   - symmetric (boolean)
-#'   - window_size (integer)
+#'   - window_size (numeric)
 #'
-#' @return no return value
+#' @return validated model_variations `data.frame` with the following columns:
+#'   `transformation`, `symmetrize`, and `window_size`
 #'
 #' @noRd
 
 validate_model_variations <- function(model_variations) {
   variation_col <- c("transformation", "symmetrize", "window_size")
   actual_col <- colnames(model_variations)
-  if (!all(variation_col %in% actual_col)) {
+  if (is.null(model_variations)) {
+    cli::cli_abort("{.arg model_variations} is missing")
+  } else if (!all(variation_col %in% actual_col)) {
     cli::cli_abort("{.arg model_variations} is missing the column{?s}: {.val {setdiff(variation_col, actual_col)}}.")
   } else if (!all(actual_col %in% variation_col) && all(variation_col %in% actual_col)) {
-    cli::cli_warn("{.arg model_variations} contains the extra column{?s}: {.val {setdiff(actual_col, variation_col)}}.")
+    cli::cli_warn("{.arg model_variations} contains the extra column{?s}:
+                  {.val {setdiff(actual_col, variation_col)}}. These will be dropped.")
+    model_variations <- model_variations[, variation_col]
   }
 
   valid_transformations <- c("none", "sqrt")
-  if (all(unique(model_variations$transformation) %in% valid_transformations)) {
-    cli::cli_abort("{.arg symmetrize} must contain only values {.val valid_transformations}")
+  if (!all(unique(model_variations$transformation) %in% valid_transformations)) {
+    cli::cli_abort("{.arg transformation} must only contain values {.val {valid_transformations}}")
   }
   if (!inherits(model_variations$symmetrize, "logical")) {
-    cli::cli_abort("{.arg symmetrize} must contain only logical values, e.g. TRUE or FALSE.")
+    cli::cli_abort("{.arg symmetrize} must only contain logical values, e.g. TRUE or FALSE.")
   }
-  if (!inherits(model_variations$window_size, "integer")) {
-    cli::cli_abort("{.arg window_size} must contain only integer values.")
+  if (!all(model_variations$window_size == trunc(model_variations$window_size))) {
+    cli::cli_abort("{.arg window_size} must only contain integer values.")
   }
+
+  return(model_variations)
 }
 
 
