@@ -14,37 +14,51 @@ test_that("missing model_variations column throws an error", {
     )
 })
 
-test_that("extra model_variations columns are dropped and throws a warning", {
-  expected_variations <- data.frame(transformation = "sqrt", symmetrize = TRUE, window_size = 3)
+test_that("extra model_variations columns throws an error", {
+  data.frame(id = 1, transformation = "sqrt", symmetrize = TRUE, window_size = 3) |>
+    validate_model_variations() |>
+    expect_error(
+      regexp = "`model_variations` contains the extra column", fixed = TRUE
+    )
+})
 
-  expect_warning(
-    actual_variations <-
-      data.frame(id = 1, transformation = "sqrt", symmetrize = TRUE, window_size = 3) |>
-      validate_model_variations()
-  )
+test_that("duplicate rows in model_variations throws an error", {
+  data.frame(transformation = c("sqrt", "sqrt"), symmetrize = c(TRUE, TRUE), window_size = c(3, 3)) |>
+    validate_model_variations() |>
+    expect_error(
+      regexp = "`model_variations` contains duplicate rows", fixed = TRUE
+    )
+})
 
-  expect_equal(expected_variations, actual_variations)
+test_that("non-duplicate rows in model_variations do not throw an error", {
+  data.frame(transformation = c("sqrt", "sqrt"), symmetrize = c(TRUE, TRUE), window_size = c(3, 4)) |>
+    validate_model_variations() |>
+    expect_no_error()
+})
+
+test_that("any argument with length > 1 throws an error", {
+  validate_variation_inputs(transformation = "log", symmetrize = TRUE, window_size = c(3, 4)) |>
+    expect_error(
+      "`window_size` must be length 1", fixed = TRUE
+    )
 })
 
 test_that("invalid transformation value throws an error", {
-  data.frame(transformation = "log", symmetrize = TRUE, window_size = 3) |>
-    validate_model_variations() |>
+  validate_variation_inputs(transformation = "log", symmetrize = TRUE, window_size = 3) |>
     expect_error(
       "`transformation` must only contain values", fixed = TRUE
     )
 })
 
 test_that("invalid symmetrize value throws an error", {
-  data.frame(transformation = "none", symmetrize = 1, window_size = 3) |>
-    validate_model_variations() |>
+  validate_variation_inputs(transformation = "none", symmetrize = 1, window_size = 3) |>
     expect_error(
       "`symmetrize` must only contain logical values", fixed = TRUE
     )
 })
 
 test_that("invalid window_size value throws an error", {
-  data.frame(transformation = "none", symmetrize = TRUE, window_size = 5.5) |>
-    validate_model_variations() |>
+  validate_variation_inputs(transformation = "none", symmetrize = TRUE, window_size = 5.5) |>
     expect_error(
       "`window_size` must only contain non-negative integer values", fixed = TRUE
     )
