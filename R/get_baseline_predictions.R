@@ -1,7 +1,8 @@
 #' Get predictions for a single baseline model
 #'
 #' @param target_ts a `data.frame` of target data in a time series format
-#'   (contains columns `time_index`, `location`, and `observation`)
+#'   (contains columns `time_index`, `location`, and `observation`) for a single
+#'   location
 #' @param transformation string specifying the transformation used on the
 #'   distribution which determines its shape; can be one of "none" or "sqrt".
 #' @param symmetrize boolean specifying whether to make the distribution symmetric;
@@ -22,34 +23,42 @@
 #' @return data frame of a baseline forecast for one location, one model with
 #'   columns `horizon` , `output_type_id`, and `value`, but which are stored
 #'   as a nested list in a 1x1 data frame
-get_baseline_predictions_new <- function(target_ts,
+get_baseline_predictions <- function(target_ts,
                                      transformation,
                                      symmetrize,
                                      window_size,
                                      effective_horizons,
                                      origin = "obs",
-                                     quantile_levels,
-                                     n_samples) {
+                                     quantile_levels = NULL,
+                                     n_samples = NULL) {
   # validate arguments
   validate_target_ts(target_ts)
 
-  tidyr::expand_grid(
-    transformation = transformation,
-    symmetrize = symmetrize,
-    window_size = window_size
-  ) |>
-    validate_model_variations()
+  num_locs <- length(unique(target_ts[["location"]]))
+  if (num_locs != 1) {
+    cli::cli_abort("{.arg target_ts} contains {.val num_locs} but only one may be provided.")
+  }
+
+  validate_variation_inputs(transformation, symmetrize, window_size)
 
   valid_origins <- c("median", "obs")
-  if (origin %in% valid_origins) {
+  if (!origin %in% valid_origins) {
     cli::cli_abort("{.arg origin} must be only one of {.val valid_origins}")
+  }
+
+  if (all(quantile_levels > 1) || all(quantile_levels < 0)) {
+    cli::cli_abort("{.arg quantile_levels} must only contain values between 0 and 1.")
+  }
+
+  if (is.null(quantile_levels) && is.null(n_samples)) {
+    cli::cli_abort("No forecasts requested: both `quantile_levels` and `n_samples` are NULL")
   }
 
   # fit
   baseline_fit <- simplets::fit_simple_ts(
     y = target_ts[["observation"]],
     ts_frequency = 1,
-    model = "quantile_baseline",
+    model = "baseline",
     transformation = transformation,
     transform_offset = ifelse(transformation == "none", 0, 1),
     d = 0,
