@@ -21,8 +21,8 @@
 #'   are generated from which to extract quantiles)
 #'
 #' @return data frame of a baseline forecast for one location, one model with
-#'   columns `horizon` , `output_type_id`, and `value`, but which are stored
-#'   as a nested list in a 1x1 data frame
+#'   columns `horizon` , `output_type`, `output_type_id`, and `value`,
+#'   but which are stored as a nested list in a 1x1 data frame
 get_baseline_predictions <- function(target_ts,
                                      transformation,
                                      symmetrize,
@@ -91,7 +91,11 @@ get_baseline_predictions <- function(target_ts,
             value = predictions[, h]
           ) |>
             tibble::rownames_to_column(var = "output_type_id") |>
-            dplyr::mutate(output_type_id = as.numeric(dplyr::row_number()), .before = 2) |>
+            dplyr::mutate(
+              output_type = "sample",
+              output_type_id = as.numeric(dplyr::row_number()),
+              .before = 2
+            ) |>
             dplyr::select("horizon", "output_type_id", "value")
         }
       ) |>
@@ -105,6 +109,7 @@ get_baseline_predictions <- function(target_ts,
         function(h) {
           data.frame(
             horizon = rep(h, n),
+            output_type = "quantile",
             output_type_id = quantile_levels,
             value = ceiling(quantile(predictions[, h], probs = quantile_levels))
           )
