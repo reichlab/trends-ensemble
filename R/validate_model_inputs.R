@@ -91,4 +91,8 @@ validate_target_ts <- function(target_ts) {
       i = "Double check that your target data does not contain duplicate rows when removing columns."
     ))
   }
+
+  if (nrow(dplyr::distinct(target_ts)) != nrow(target_ts)) {
+    cli::cli_abort("{.arg target_ts} contains duplicate rows.")
+  }
 }

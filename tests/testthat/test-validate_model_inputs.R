@@ -95,6 +95,14 @@ test_that("extra target_ts columns throws an error", {
     )
 })
 
+test_that("duplicate rows in target_ts throws an error", {
+  data.frame(time_index = rep(as.Date("2023-05-15"), 2), location = c("US", "US"), observation = c(100, 100)) |>
+    validate_target_ts() |>
+    expect_error(
+      regexp = "`target_ts` contains duplicate rows", fixed = TRUE
+    )
+})
+
 test_that("correctly formatted target_ts throws no errors", {
   data.frame(time_index = as.Date("2023-05-15"), location = "US", observation = 100) |>
     validate_target_ts() |>
