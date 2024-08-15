@@ -9,20 +9,27 @@
 #'   can be one of `TRUE` or `FALSE`.
 #' @param window_size integer specifying how many previous observations in the
 #'   target data should be used to inform the forecasts
-#' @param effective horizons numeric vector of prediction horizons relative to
+#' @param effective_horizons numeric vector of prediction horizons relative to
 #'   the last observed date in `target_ts`
 #' @param origin string specifying the origin to use when making predictions;
 #'   recommended to be "median" if the temporal resolution is daily and "obs"
 #'   if weekly or otherwise. Defaults to "obs".
-#' @param quantile_levels numeric vector of quantile levels to output; set to NA
-#'   if quantile outputs not requested
+#' @param quantile_levels numeric vector of quantile levels to output; set to NULL
+#'   if quantile outputs not requested. Defaults to NULL.
 #' @param n_samples integer of amount of samples to output (and predict);
-#'   set to NA if sample outputs not requested (in this case 100000 samples
-#'   are generated from which to extract quantiles)
+#'   set to NULL if sample outputs not requested (in this case 100000 samples
+#'   are generated from which to extract quantiles). Defaults to NULL.
+#' @param round_predictions boolean specifying whether to round the output
+#'   predictions to the nearest whole number. Defaults to FALSE
+#' @param seed integer specifying a seed to set for reproducible results.
+#'   Defaults to NULL, in which case no seed is set.
 #'
 #' @return data frame of a baseline forecast for one location, one model with
 #'   columns `horizon` , `output_type`, `output_type_id`, and `value`,
 #'   but which are stored as a nested list in a 1x1 data frame
+#'
+#' @importFrom rlang .data
+
 get_baseline_predictions <- function(target_ts,
                                      transformation,
                                      symmetrize,
@@ -30,7 +37,9 @@ get_baseline_predictions <- function(target_ts,
                                      effective_horizons,
                                      origin = "obs",
                                      quantile_levels = NULL,
-                                     n_samples = NULL) {
+                                     n_samples = NULL,
+                                     round_predictions = FALSE,
+                                     seed = NULL) {
   # validate arguments
   validate_target_ts(target_ts)
 
@@ -46,7 +55,7 @@ get_baseline_predictions <- function(target_ts,
     cli::cli_abort("{.arg origin} must be only one of {.val valid_origins}")
   }
 
-  if (all(quantile_levels > 1) || all(quantile_levels < 0)) {
+  if (any(quantile_levels > 1) || any(quantile_levels < 0)) {
     cli::cli_abort("{.arg quantile_levels} must only contain values between 0 and 1.")
   }
 
@@ -54,11 +63,13 @@ get_baseline_predictions <- function(target_ts,
     cli::cli_abort("No forecasts requested: both `quantile_levels` and `n_samples` are NULL")
   }
 
+  if (!is.null(seed)) set.seed(seed)
+
   # fit
   baseline_fit <- simplets::fit_simple_ts(
     y = target_ts[["observation"]],
     ts_frequency = 1,
-    model = "baseline",
+    model = "quantile_baseline",
     transformation = transformation,
     transform_offset = ifelse(transformation == "none", 0, 1),
     d = 0,
@@ -69,7 +80,7 @@ get_baseline_predictions <- function(target_ts,
 
   # predict
   predictions <- baseline_fit |>
-    predict(
+    stats::predict(
       nsim = ifelse(is.null(n_samples), 100000, n_samples),
       horizon = max(effective_horizons),
       origin = origin,
@@ -96,7 +107,7 @@ get_baseline_predictions <- function(target_ts,
               output_type_id = as.numeric(dplyr::row_number()),
               .before = 2
             ) |>
-            dplyr::select("horizon", "output_type_id", "value")
+            dplyr::select("horizon", "output_type", "output_type_id", "value")
         }
       ) |>
       purrr::list_rbind()
@@ -111,7 +122,7 @@ get_baseline_predictions <- function(target_ts,
             horizon = rep(h, n),
             output_type = "quantile",
             output_type_id = quantile_levels,
-            value = ceiling(quantile(predictions[, h], probs = quantile_levels))
+            value = stats::quantile(predictions[, h], probs = quantile_levels)
           )
         }
       ) |>
