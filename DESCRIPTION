@@ -32,6 +32,7 @@ Imports:
     cli,
     dplyr,
     purrr,
+    rlang,
     simplets,
     tibble
 Remotes: 
