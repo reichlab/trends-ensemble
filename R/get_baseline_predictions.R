@@ -129,5 +129,8 @@ get_baseline_predictions <- function(target_ts,
       purrr::list_rbind()
   }
 
-  return(dplyr::tibble(forecasts = list(rbind(samples_df, quantiles_df))))
+  combined_df <- rbind(samples_df, quantiles_df)
+  if (round_predictions) combined_df[["value"]] <- round(combined_df[["value"]], 0)
+
+  return(dplyr::tibble(forecasts = list(combined_df)))
 }
