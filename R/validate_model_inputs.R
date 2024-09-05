@@ -55,18 +55,27 @@ validate_variation_inputs <- function(transformation, symmetrize, window_size) {
   # check variation inputs have length 1
   if (length(transformation) != 1) {
     cli::cli_abort("{.arg transformation} must be length 1")
-  } else if (length(symmetrize) != 1) {
+  }
+
+  if (length(symmetrize) != 1) {
     cli::cli_abort("{.arg symmetrize} must be length 1")
-  } else if (length(window_size) != 1) {
+  }
+
+  if (length(window_size) != 1) {
     cli::cli_abort("{.arg window_size} must be length 1")
   }
 
+  # check variation inputs contain only valid values
   valid_transformations <- c("none", "sqrt")
   if (!transformation %in% valid_transformations) {
     cli::cli_abort("{.arg transformation} must only contain values {.val {valid_transformations}}")
-  } else if (!inherits(symmetrize, "logical")) {
+  }
+
+  if (!inherits(symmetrize, "logical")) {
     cli::cli_abort("{.arg symmetrize} must only contain logical values, e.g. TRUE or FALSE.")
-  } else if (window_size != trunc(window_size) || window_size < 0) {
+  }
+
+  if (window_size != trunc(window_size) || window_size < 0) {
     cli::cli_abort("{.arg window_size} must only contain non-negative integer values.")
   }
 }
