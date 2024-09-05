@@ -86,10 +86,6 @@ get_baseline_predictions <- function(target_ts,
       force_nonneg = TRUE
     )
 
-  # truncate to non-negative
-  # AG: wondering what the correct order of operations is here
-  predictions <- pmax(predictions, 0)
-
   # extract requested forecasts
   samples_df <- NULL
   if (!is.null(n_samples)) {
