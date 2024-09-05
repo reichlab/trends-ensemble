@@ -19,18 +19,12 @@
 #' @noRd
 
 validate_model_variations <- function(model_variations) {
-  variation_col <- c("transformation", "symmetrize", "window_size")
-  actual_col <- colnames(model_variations)
   if (is.null(model_variations)) {
     cli::cli_abort("{.arg model_variations} is missing")
-  } else if (!all(variation_col %in% actual_col)) {
-    cli::cli_abort("{.arg model_variations} is missing the column{?s}: {.val {setdiff(variation_col, actual_col)}}.")
-  } else if (!all(actual_col %in% variation_col) && all(variation_col %in% actual_col)) {
-    cli::cli_abort(c(
-      x = "{.arg model_variations} contains the extra column{?s}: {.val {setdiff(actual_col, variation_col)}}.",
-      i = "Double check that your model variations table does not contain duplicate rows when removing columns."
-    ))
   }
+
+  variation_col <- c("transformation", "symmetrize", "window_size")
+  validate_colnames(model_variations, variation_col, "model_variations")
 
   if (nrow(dplyr::distinct(model_variations)) != nrow(model_variations)) {
     cli::cli_abort("{.arg model_variations} contains duplicate rows.")
@@ -91,17 +85,32 @@ validate_variation_inputs <- function(transformation, symmetrize, window_size) {
 #' @noRd
 validate_target_ts <- function(target_ts) {
   target_col <- c("time_index", "location", "observation")
-  actual_col <- colnames(target_ts)
-  if (!all(target_col %in% actual_col)) {
-    cli::cli_abort("{.arg target_ts} is missing the column{?s}: {.val {setdiff(target_col, actual_col)}}.")
-  } else if (!all(actual_col %in% target_col) && all(target_col %in% actual_col)) {
-    cli::cli_abort(c(
-      x = "{.arg target_ts} contains the extra column{?s}: {.val {setdiff(actual_col, target_col)}}.",
-      i = "Double check that your target data does not contain duplicate rows when removing columns."
-    ))
-  }
+  validate_colnames(target_ts, target_col, "target_ts")
 
   if (nrow(dplyr::distinct(target_ts)) != nrow(target_ts)) {
     cli::cli_abort("{.arg target_ts} contains duplicate rows.")
+  }
+}
+
+
+#' Validate that a dataframe's columns are (named) as expected
+#'
+#' @param df a `data.frame` whose columns are to be validated
+#' @param expected_col a character vector of expected column names
+#' @param arg_name character string name of the argument being validated to be
+#'   printed in the error message(generally the name of the `df` object)
+#'
+#' @return no return value
+#'
+#' @noRd
+validate_colnames <- function(df, expected_col, arg_name) {
+  actual_col <- colnames(df)
+  if (!all(expected_col %in% actual_col)) {
+    cli::cli_abort("{.arg {arg_name}} is missing the column{?s}: {.val {setdiff(expected_col, actual_col)}}.")
+  }
+  if (!all(actual_col %in% expected_col)) {
+    cli::cli_abort(c(
+      x = "{.arg {arg_name}} contains the extra column{?s}: {.val {setdiff(actual_col, expected_col)}}."
+    ))
   }
 }
