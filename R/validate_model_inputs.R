@@ -26,7 +26,7 @@ validate_model_variations <- function(model_variations) {
   variation_col <- c("transformation", "symmetrize", "window_size")
   validate_colnames(model_variations, variation_col, "model_variations")
 
-  if (nrow(dplyr::distinct(model_variations)) != nrow(model_variations)) {
+  if (any(duplicated(model_variations))) {
     cli::cli_abort("{.arg model_variations} contains duplicate rows.")
   }
 }
@@ -87,7 +87,7 @@ validate_target_ts <- function(target_ts) {
   target_col <- c("time_index", "location", "observation")
   validate_colnames(target_ts, target_col, "target_ts")
 
-  if (nrow(dplyr::distinct(target_ts)) != nrow(target_ts)) {
+  if (any(duplicated(target_ts))) {
     cli::cli_abort("{.arg target_ts} contains duplicate rows.")
   }
 }
