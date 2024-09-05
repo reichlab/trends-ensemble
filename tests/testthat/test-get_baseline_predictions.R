@@ -78,12 +78,7 @@ test_that("only non-negative forecast values are returned", {
                              seed = 1234) |>
     tidyr::unnest(cols = c("forecasts"))
 
-  min_value <- min(sample_predictions$value)
-  if (min_value != 0) {
-    expect_gt(min(sample_predictions$value), 0)
-  } else {
-    expect_equal(min(sample_predictions$value), 0)
-  }
+  expect_gte(min(sample_predictions$value), 0)
 })
 
 test_that("results are reproducible", {
