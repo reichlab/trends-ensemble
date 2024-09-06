@@ -105,6 +105,21 @@ get_baseline_predictions <- function(target_ts,
 }
 
 
+#' Extract and compute sample and/or quantile forecasts from a prediction matrix
+#'
+#' @param predictions a `matrix` of `n_sim` runs of sample predictions with
+#'   dimensions n_sim x max(effective_horizons)
+#' @param effective_horizons numeric vector of prediction horizons relative to
+#'   the last observed date in `target_ts`
+#' @param quantile_levels numeric vector of quantile levels to output; set to NULL
+#'   if quantile outputs not requested. Defaults to NULL.
+#' @param n_samples integer number of samples to output, which are drawn from the
+#'   simulated (sample) predictions (hence n_samples <= n_sim). Set to NULL
+#'   if sample outputs not requested. Defaults to NULL.
+#'
+#' @return data frame of extracted sample and/or quantile forecasts with
+#'   columns `horizon` , `output_type`, `output_type_id`, and `value`
+#'
 extract_predictions <- function(predictions,
                                 effective_horizons,
                                 quantile_levels = NULL,
