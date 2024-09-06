@@ -98,7 +98,17 @@ get_baseline_predictions <- function(target_ts,
       force_nonneg = TRUE
     )
 
-  # extract requested forecasts
+  forecasts_df <- extract_predictions(predictions, effective_horizons, quantile_levels, n_samples)
+
+  if (round_predictions) forecasts_df[["value"]] <- round(forecasts_df[["value"]], 0)
+  return(dplyr::tibble(forecasts = list(forecasts_df)))
+}
+
+
+extract_predictions <- function(predictions,
+                                effective_horizons,
+                                quantile_levels = NULL,
+                                n_samples = NULL) {
   samples_df <- NULL
   if (!is.null(n_samples)) {
     samples_df <- effective_horizons |>
@@ -137,7 +147,5 @@ get_baseline_predictions <- function(target_ts,
   }
 
   combined_df <- rbind(samples_df, quantiles_df)
-  if (round_predictions) combined_df[["value"]] <- round(combined_df[["value"]], 0)
-
-  return(dplyr::tibble(forecasts = list(combined_df)))
+  return(combined_df)
 }
