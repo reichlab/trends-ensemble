@@ -57,17 +57,17 @@ get_baseline_predictions <- function(target_ts,
     cli::cli_abort("{.arg origin} must be only one of {.val valid_origins}")
   }
 
-  if (!is.numeric(n_sim) || n_sim < 0 || n_sim != trunc(n_sim) || length(n_sim) != 1) {
-    cli::cli_abort("{.arg n_sim} must be a single, non-negative integer value.")
-  }
+  validate_integer(n_sim, "n_sim")
 
   if (any(quantile_levels > 1) || any(quantile_levels < 0)) {
     cli::cli_abort("{.arg quantile_levels} must only contain values between 0 and 1.")
   }
 
-  if (!is.null(n_samples) &&
-        (n_samples > n_sim || n_samples < 0 || n_samples != trunc(n_samples) || length(n_samples) != 1)) {
-    cli::cli_abort("{.arg n_samples} must be a single, non-negative integer value.")
+  if (!is.null(n_samples)) {
+    validate_integer(n_samples, "n_samples")
+    if (n_samples > n_sim) {
+      cli::cli_abort("{.arg n_samples} must be less than or equal to {.arg n_sim}")
+    }
   }
 
   if (is.null(quantile_levels) && is.null(n_samples)) {

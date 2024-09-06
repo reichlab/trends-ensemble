@@ -114,3 +114,19 @@ validate_colnames <- function(df, expected_col, arg_name) {
     ))
   }
 }
+
+
+#' Validate that an integer is as expected and non-negative
+#'
+#' @param int a single integer to be validated
+#' @param arg_name character string name of the argument being validated to be
+#'   printed in the error message(generally the name of the `int` object)
+#'
+#' @return no return value
+#'
+#' @noRd
+validate_integer <- function(int, arg_name) {
+  if (!is.numeric(int) || int < 0 || int != trunc(int) || length(int) != 1) {
+    cli::cli_abort("{.arg {arg_name}} must be a single, non-negative integer value.")
+  }
+}
