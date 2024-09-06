@@ -1,4 +1,4 @@
-#' Get predictions for a single baseline model
+#' Get sample and/or quantile type predictions for a single baseline model
 #'
 #' @param target_ts a `data.frame` of target data in a time series format
 #'   (contains columns `time_index`, `location`, and `observation`) for a single

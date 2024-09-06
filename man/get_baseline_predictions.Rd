@@ -2,7 +2,7 @@
 % Please edit documentation in R/get_baseline_predictions.R
 \name{get_baseline_predictions}
 \alias{get_baseline_predictions}
-\title{Get predictions for a single baseline model}
+\title{Get sample and/or quantile type predictions for a single baseline model}
 \usage{
 get_baseline_predictions(
   target_ts,
@@ -60,5 +60,5 @@ columns \code{horizon} , \code{output_type}, \code{output_type_id}, and \code{va
 but which are stored as a nested list in a 1x1 data frame
 }
 \description{
-Get predictions for a single baseline model
+Get sample and/or quantile type predictions for a single baseline model
 }
