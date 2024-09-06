@@ -35,6 +35,21 @@ test_that("invalid origin value throws an error", {
     )
 })
 
+test_that("invalid n_sim value throws an error", {
+  get_baseline_predictions(target_ts,
+                           transformation = "none",
+                           symmetrize = TRUE,
+                           window_size = 3,
+                           effective_horizons = 1:4,
+                           origin = "obs",
+                           n_sim = "test",
+                           quantile_levels = NULL,
+                           n_samples = 100) |>
+    expect_error(
+      regexp = "`n_sim` must be a single, non-negative integer value.", fixed = TRUE
+    )
+})
+
 test_that("invalid quantile_levels value throws an error", {
   get_baseline_predictions(target_ts,
                            transformation = "none",
@@ -46,6 +61,21 @@ test_that("invalid quantile_levels value throws an error", {
                            n_samples = NULL) |>
     expect_error(
       regexp = "`quantile_levels` must only contain values between 0 and 1.", fixed = TRUE
+    )
+})
+
+test_that("invalid n_samples value throws an error", {
+  get_baseline_predictions(target_ts,
+                           transformation = "none",
+                           symmetrize = TRUE,
+                           window_size = 3,
+                           effective_horizons = 1:4,
+                           origin = "obs",
+                           n_sim = 100000,
+                           quantile_levels = NULL,
+                           n_samples = 10.5) |>
+    expect_error(
+      regexp = "`n_samples` must be a single, non-negative integer value.", fixed = TRUE
     )
 })
 
@@ -72,6 +102,7 @@ test_that("only non-negative forecast values are returned", {
                              window_size = 3,
                              effective_horizons = 1:4,
                              origin = "obs",
+                             n_sim = 10000,
                              quantile_levels = NULL,
                              n_samples = 10000,
                              round_predictions = FALSE,
@@ -88,6 +119,7 @@ test_that("results are reproducible", {
                              window_size = 3,
                              effective_horizons = 1:4,
                              origin = "obs",
+                             n_sim = 10000,
                              quantile_levels = NULL,
                              n_samples = 10000,
                              round_predictions = FALSE,
@@ -99,6 +131,7 @@ test_that("results are reproducible", {
                              window_size = 3,
                              effective_horizons = 1:4,
                              origin = "obs",
+                             n_sim = 10000,
                              quantile_levels = NULL,
                              n_samples = 10000,
                              round_predictions = FALSE,
@@ -111,6 +144,7 @@ test_that("results are reproducible", {
                              window_size = 3,
                              effective_horizons = 1:4,
                              origin = "obs",
+                             n_sim = 10000,
                              quantile_levels = c(.1, .5, .9),
                              n_samples = NULL,
                              round_predictions = FALSE,
@@ -122,6 +156,7 @@ test_that("results are reproducible", {
                              window_size = 3,
                              effective_horizons = 1:4,
                              origin = "obs",
+                             n_sim = 10000,
                              quantile_levels = c(.1, .5, .9),
                              n_samples = NULL,
                              round_predictions = FALSE,
@@ -134,6 +169,7 @@ test_that("results are reproducible", {
                              window_size = 3,
                              effective_horizons = 1:4,
                              origin = "obs",
+                             n_sim = 10000,
                              quantile_levels = c(.1, .5, .9),
                              n_samples = 10000,
                              round_predictions = FALSE,
@@ -145,6 +181,7 @@ test_that("results are reproducible", {
                              window_size = 3,
                              effective_horizons = 1:4,
                              origin = "obs",
+                             n_sim = 10000,
                              quantile_levels = c(.1, .5, .9),
                              n_samples = 10000,
                              round_predictions = FALSE,
@@ -187,6 +224,7 @@ test_that("the correct combination of horizon, output types, and output type IDs
                              window_size = 3,
                              effective_horizons = 1:4,
                              origin = "obs",
+                             n_sim = 10000,
                              quantile_levels = NULL,
                              n_samples = 10000,
                              round_predictions = FALSE,
@@ -200,6 +238,7 @@ test_that("the correct combination of horizon, output types, and output type IDs
                              window_size = 3,
                              effective_horizons = 1:4,
                              origin = "obs",
+                             n_sim = 10000,
                              quantile_levels = c(.1, .5, .9),
                              n_samples = NULL,
                              round_predictions = FALSE,
@@ -213,6 +252,7 @@ test_that("the correct combination of horizon, output types, and output type IDs
                              window_size = 3,
                              effective_horizons = 1:4,
                              origin = "obs",
+                             n_sim = 10000,
                              quantile_levels = c(.1, .5, .9),
                              n_samples = 10000,
                              round_predictions = FALSE,
@@ -254,6 +294,7 @@ test_that("forecasts are correctly rounded when requested", {
                              window_size = 3,
                              effective_horizons = 1:4,
                              origin = "obs",
+                             n_sim = 10000,
                              quantile_levels = c(0.1, 0.5, 0.9),
                              n_samples = 10000,
                              round_predictions = TRUE,
@@ -285,6 +326,7 @@ test_that("quantile forecasts are correctly calculated", {
                              window_size = 3,
                              effective_horizons = 1:4,
                              origin = "obs",
+                             n_sim = 10000,
                              quantile_levels = NULL,
                              n_samples = 10000,
                              round_predictions = FALSE,
@@ -307,6 +349,7 @@ test_that("quantile forecasts are correctly calculated", {
                              window_size = 3,
                              effective_horizons = 1:4,
                              origin = "obs",
+                             n_sim = 10000,
                              quantile_levels = quantile_levels,
                              n_samples = NULL,
                              round_predictions = FALSE,

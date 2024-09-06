@@ -14,10 +14,12 @@
 #' @param origin string specifying the origin to use when making predictions;
 #'   recommended to be "median" if the temporal resolution is daily and "obs"
 #'   if weekly or otherwise. Defaults to "obs".
+#' @param n_sim integer number of simulations to predict. Defaults to 100000.
 #' @param quantile_levels numeric vector of quantile levels to output; set to NULL
 #'   if quantile outputs not requested. Defaults to NULL.
-#' @param n_samples integer number of samples to output (and predict);
-#'   Defaults to NULL, in which case 100000 samples are generated.
+#' @param n_samples integer number of samples to output, which are drawn from the
+#'   simulated (sample) predictions (hence n_samples <= n_sim). Set to NULL
+#'   if sample outputs not requested. Defaults to NULL.
 #' @param round_predictions boolean specifying whether to round the output
 #'   predictions to the nearest whole number. Defaults to FALSE
 #' @param seed integer specifying a seed to set for reproducible results.
@@ -35,6 +37,7 @@ get_baseline_predictions <- function(target_ts,
                                      window_size,
                                      effective_horizons,
                                      origin = "obs",
+                                     n_sim = 100000,
                                      quantile_levels = NULL,
                                      n_samples = NULL,
                                      round_predictions = FALSE,
@@ -54,8 +57,17 @@ get_baseline_predictions <- function(target_ts,
     cli::cli_abort("{.arg origin} must be only one of {.val valid_origins}")
   }
 
+  if (!is.numeric(n_sim) || n_sim < 0 || n_sim != trunc(n_sim) || length(n_sim) != 1) {
+    cli::cli_abort("{.arg n_sim} must be a single, non-negative integer value.")
+  }
+
   if (any(quantile_levels > 1) || any(quantile_levels < 0)) {
     cli::cli_abort("{.arg quantile_levels} must only contain values between 0 and 1.")
+  }
+
+  if (!is.null(n_samples) &&
+        (n_samples > n_sim || n_samples < 0 || n_samples != trunc(n_samples) || length(n_samples) != 1)) {
+    cli::cli_abort("{.arg n_samples} must be a single, non-negative integer value.")
   }
 
   if (is.null(quantile_levels) && is.null(n_samples)) {
@@ -80,7 +92,7 @@ get_baseline_predictions <- function(target_ts,
   # predict
   predictions <- baseline_fit |>
     stats::predict(
-      nsim = ifelse(is.null(n_samples), 100000, n_samples),
+      nsim = n_sim,
       horizon = max(effective_horizons),
       origin = origin,
       force_nonneg = TRUE
@@ -94,7 +106,7 @@ get_baseline_predictions <- function(target_ts,
         function(h) {
           data.frame(
             horizon = rep(h, n_samples),
-            value = predictions[, h]
+            value = predictions[1:n_samples, h]
           ) |>
             tibble::rownames_to_column(var = "output_type_id") |>
             dplyr::mutate(

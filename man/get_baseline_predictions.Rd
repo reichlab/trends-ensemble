@@ -11,6 +11,7 @@ get_baseline_predictions(
   window_size,
   effective_horizons,
   origin = "obs",
+  n_sim = 1e+05,
   quantile_levels = NULL,
   n_samples = NULL,
   round_predictions = FALSE,
@@ -38,12 +39,14 @@ the last observed date in \code{target_ts}}
 recommended to be "median" if the temporal resolution is daily and "obs"
 if weekly or otherwise. Defaults to "obs".}
 
+\item{n_sim}{integer number of simulations to predict. Defaults to 100000.}
+
 \item{quantile_levels}{numeric vector of quantile levels to output; set to NULL
 if quantile outputs not requested. Defaults to NULL.}
 
-\item{n_samples}{integer of amount of samples to output (and predict);
-set to NULL if sample outputs not requested (in this case 100000 samples
-are generated from which to extract quantiles). Defaults to NULL.}
+\item{n_samples}{integer number of samples to output, which are drawn from the
+simulated (sample) predictions (hence n_samples <= n_sim). Set to NULL
+if sample outputs not requested. Defaults to NULL.}
 
 \item{round_predictions}{boolean specifying whether to round the output
 predictions to the nearest whole number. Defaults to FALSE}
