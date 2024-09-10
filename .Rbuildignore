@@ -1,4 +1,6 @@
 ^trendsEnsemble\.Rproj$
 ^\.Rproj\.user$
 ^\.github$
+^\.lintr$
 ^README\.Rmd$
+^LICENSE\.md$
