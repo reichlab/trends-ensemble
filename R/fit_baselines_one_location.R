@@ -14,10 +14,6 @@
 #' target_ts and horizons
 #' @param horizons numeric vector of prediction horizons relative to
 #'   the reference_date, e.g. 0:3 or 1:4
-#' @param target character string specifying the name of the prediction target
-#' @param origin string specifying the origin to use when making predictions;
-#'   recommended to be "median" if the temporal resolution is daily and "obs"
-#'   if weekly or otherwise. Defaults to "obs".
 #' @param quantile_levels numeric vector of quantile levels to output; set to NULL
 #'   if quantile outputs not requested. Defaults to NULL.
 #' @param n_samples integer of amount of samples to output (and predict);
@@ -46,8 +42,6 @@ fit_baselines_one_location <- function(model_variations,
                                        reference_date,
                                        temporal_resolution,
                                        horizons,
-                                       target,
-                                       origin,
                                        quantile_levels,
                                        n_samples,
                                        round_predictions = FALSE,
@@ -111,21 +105,11 @@ fit_baselines_one_location <- function(model_variations,
     dplyr::bind_cols(model_variations, predictions) |>
     tidyr::unnest(cols = "forecasts") |>
     dplyr::mutate(
-      model_id = paste(
-        "UMass-baseline",
-        .data[["transformation"]],
-        ifelse(.data[["symmetrize"]], "sym", "nonsym"),
-        .data[["window_size"]],
-        temporal_resolution,
-        sep = "_"
-      ),
       location = unique(target_ts$location),
       horizon = .data[["horizon"]],
-      target = target,
       target_end_date = last_data_date + ts_temp_res * .data[["horizon"]],
       .before = "horizon"
-    ) |>
-    dplyr::select(-dplyr::all_of(c("transformation", "symmetrize", "window_size")))
+    )
 
   # h_adjustments = 0 (min(actual_target_dates) occurs period after last observed value)
 
@@ -134,17 +118,17 @@ fit_baselines_one_location <- function(model_variations,
       dplyr::mutate(
         reference_date = reference_date,
         horizon = as.numeric((.data[["target_end_date"]] - as.Date(reference_date)) / ts_temp_res),
-        .before = target
+        .before = "horizon"
       )
   } else if (h_adjustments < 0) {
     model_outputs <- extracted_outputs |>
-      dplyr::group_by(dplyr::across(c("model_id", "location", "target", "output_type"))) |>
+      dplyr::group_by(dplyr::across(c("transformation", "symmetrize", "window_size", "location", "output_type"))) |>
       tidyr::complete(target_end_date = actual_target_dates, .data[["output_type_id"]]) |>
       dplyr::ungroup() |>
       dplyr::mutate(
         reference_date = reference_date,
         horizon = as.numeric((.data[["target_end_date"]] - as.Date(reference_date)) / ts_temp_res),
-        .before = target
+        .before = "horizon"
       ) |>
       dplyr::left_join(
         dplyr::filter(target_ts, .data[["time_index"]] %in% actual_target_dates),
@@ -168,7 +152,7 @@ fit_baselines_one_location <- function(model_variations,
 
   model_outputs |>
     dplyr::select(dplyr::all_of(c(
-      "model_id", "location", "reference_date", "horizon", "target",
-      "target_end_date", "output_type", "output_type_id", "value"
+      "transformation", "symmetrize", "window_size", "location", "reference_date",
+      "horizon", "target_end_date", "output_type", "output_type_id", "value"
     )))
 }

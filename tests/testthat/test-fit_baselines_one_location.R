@@ -17,8 +17,6 @@ test_that("multiple locations in target data throws an error", {
                              reference_date = "2023-01-14",
                              temporal_resolution = "weekly",
                              horizons = 0:3,
-                             target = "inc hosp",
-                             origin = "obs",
                              quantile_levels = c(.1, .5, .9),
                              n_samples = NULL) |>
     expect_error(
@@ -32,8 +30,6 @@ test_that("invalid temporal resolution throws an error", {
                              reference_date = "2023-01-14",
                              temporal_resolution = "monthly",
                              horizons = 0:3,
-                             target = "inc hosp",
-                             origin = "obs",
                              quantile_levels = c(.1, .5, .9),
                              n_samples = NULL) |>
     expect_error(
@@ -47,8 +43,6 @@ test_that("provided temporal_resolution not matching that of target_ts throws an
                              reference_date = "2023-01-14",
                              temporal_resolution = "daily",
                              horizons = 0:3,
-                             target = "inc hosp",
-                             origin = "obs",
                              quantile_levels = c(.1, .5, .9),
                              n_samples = NULL) |>
     expect_error(
@@ -66,8 +60,6 @@ test_that("missing target data is extrapolated with most recent observation and 
       reference_date = "2023-01-21",
       temporal_resolution = "weekly",
       horizons = 0:3,
-      target = "inc hosp",
-      origin = "obs",
       quantile_levels = c(.1, .5, .9),
       n_samples = NULL,
       seed = 1234
@@ -79,8 +71,6 @@ test_that("missing target data is extrapolated with most recent observation and 
         reference_date = "2023-01-21",
         temporal_resolution = "weekly",
         horizons = 0:3,
-        target = "inc hosp",
-        origin = "obs",
         quantile_levels = c(.1, .5, .9),
         n_samples = NULL,
         seed = 1234
@@ -96,9 +86,9 @@ test_that("overlapping forecasts are replaced with observed values and throws a 
     rbind(
       expand.grid(
         stringsAsFactors = FALSE,
-        model_id = c("UMass-baseline_none_sym_3_weekly", "UMass-baseline_none_sym_4_weekly"),
+        transformation = "none", symmetrize = TRUE, window_size = c(3, 4),
         location = "ak", reference_date = as.Date("2023-01-07"),
-        horizon = 0, target = "inc hosp", target_end_date = as.Date("2023-01-07"),
+        horizon = 0, target_end_date = as.Date("2023-01-07"),
         output_type = "quantile", output_type_id = c(0.1, 0.5, 0.9), value = 32
       ),
       fit_baselines_one_location(
@@ -107,8 +97,6 @@ test_that("overlapping forecasts are replaced with observed values and throws a 
         reference_date = "2023-01-14",
         temporal_resolution = "weekly",
         horizons = 0:2,
-        target = "inc hosp",
-        origin = "obs",
         quantile_levels = c(.1, .5, .9),
         n_samples = NULL,
         seed = 1234
@@ -118,7 +106,7 @@ test_that("overlapping forecasts are replaced with observed values and throws a 
           horizon = horizon + 1
         )
     ) |>
-    dplyr::arrange(model_id) |>
+    dplyr::arrange(transformation, symmetrize, window_size) |>
     dplyr::tibble()
   attr(expected_outputs, "out.attrs") <- NULL
   expect_warning(
@@ -128,8 +116,6 @@ test_that("overlapping forecasts are replaced with observed values and throws a 
         reference_date = "2023-01-07",
         temporal_resolution = "weekly",
         horizons = 0:3,
-        target = "inc hosp",
-        origin = "obs",
         quantile_levels = c(.1, .5, .9),
         n_samples = NULL,
         seed = 1234

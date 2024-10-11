@@ -10,8 +10,6 @@ fit_baselines_one_location(
   reference_date,
   temporal_resolution,
   horizons,
-  target,
-  origin,
   quantile_levels,
   n_samples,
   round_predictions = FALSE,
@@ -37,12 +35,6 @@ target_ts and horizons}
 
 \item{horizons}{numeric vector of prediction horizons relative to
 the reference_date, e.g. 0:3 or 1:4}
-
-\item{target}{character string specifying the name of the prediction target}
-
-\item{origin}{string specifying the origin to use when making predictions;
-recommended to be "median" if the temporal resolution is daily and "obs"
-if weekly or otherwise. Defaults to "obs".}
 
 \item{quantile_levels}{numeric vector of quantile levels to output; set to NULL
 if quantile outputs not requested. Defaults to NULL.}
