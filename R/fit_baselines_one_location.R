@@ -11,7 +11,7 @@
 #'   the date relative to which the targets are defined (usually Saturday for
 #'   weekly targets)
 #' @param temporal_resolution 'daily' or 'weekly'; specifies timescale of
-#' target_ts and horizons
+#'   `target_ts` and `horizons`
 #' @param horizons numeric vector of prediction horizons relative to
 #'   the reference_date, e.g. 0:3 or 1:4
 #' @param quantile_levels numeric vector of quantile levels to output; set to NULL
@@ -30,6 +30,22 @@
 #'   - symmetrize (boolean), determines if distribution is symmetric
 #'   - window_size (integer), determines how many previous observations inform
 #'     the forecast
+#'
+#' Additionally, this function will return slightly different output forecasts
+#' depending on the relationship between the `reference_date`, requested `horizons`,
+#' and dates contained within `target_ts`. There are three possible cases:
+#'   1. The requested forecasts begin exactly one time unit (given by the
+#'      temporal_resolution) after the last observed value. Here, no changes are
+#'      made to the returned forecasts.
+#'   2. The requested forecasts begin two or more time units after the last
+#'      observed value. Here, the missing observed data between the last observed
+#'      value in `target_ts` is imputed using that last observed value, then
+#'      forecasts are computed as usual.
+#'   3. The dates for the requested forecasts overlap partially or completely with
+#'      observed values contained within `target_ts`. Here, any forecasted values
+#'      for overlapping dates are replaced by the associated observed values.
+#'
+#' Note that we warn for the second and third cases.
 #'
 #' @return data frame of a baseline forecast for one location, all models with
 #'   columns `transformation`, `symmetrize`, `window_size`, `horizon`,
@@ -62,13 +78,13 @@ fit_baselines_one_location <- function(model_variations,
 
   # figure out horizons to forecast
   reference_date <- lubridate::ymd(reference_date) # date to which horizons are relative
-  last_data_date <- max(target_ts$time_index)
+  last_data_date <- max(target_ts$time_index) # last day of target date
   actual_target_dates <- reference_date + ts_temp_res * horizons
   effective_horizons <- as.integer(actual_target_dates - last_data_date) / ts_temp_res
   horizons_to_forecast <- 1:max(effective_horizons)
   h_adjustments <- min(effective_horizons) - 1
 
-  if (h_adjustments > 0) {
+  if (h_adjustments > 0) { # all(effective_horizons) >= 2
     cli::cli_warn(
       "forecasts requested for a time index beyond the provided {.arg target_ts},
         replacing missing target data with {.val {h_adjustments}} target observations"
@@ -80,10 +96,11 @@ fit_baselines_one_location <- function(model_variations,
         fill = list(observation = target_ts$observation[target_ts$time_index == last_data_date]),
       )
 
+    # Update what to be forecasted
     last_data_date <- max(target_ts$time_index)
     effective_horizons <- as.integer(actual_target_dates - last_data_date) / ts_temp_res
     horizons_to_forecast <- 1:max(effective_horizons)
-    h_adjustments <- min(effective_horizons) - 1
+    h_adjustments <- min(effective_horizons) - 1 # now is 0
   }
 
   # get predictions for all model_variations
@@ -110,9 +127,7 @@ fit_baselines_one_location <- function(model_variations,
       .before = "horizon"
     )
 
-  # h_adjustments = 0 (min(actual_target_dates) occurs period after last observed value)
-
-  if (h_adjustments == 0) {
+  if (h_adjustments == 0) { # min(actual_target_dates) occurs period after last observed value
     model_outputs <- extracted_outputs |>
       dplyr::mutate(
         reference_date = reference_date,
@@ -120,6 +135,9 @@ fit_baselines_one_location <- function(model_variations,
         .before = "horizon"
       )
   } else if (h_adjustments < 0) {
+    # here extracted_outputs only contains forecasts not replaced by observed values
+    # `complete()` adds the remaining rows to avoid unnecessary computations and
+    # `mutate(value = ...)` adds observed values for rows we didn't forecast
     model_outputs <- extracted_outputs |>
       dplyr::group_by(dplyr::across(c("transformation", "symmetrize", "window_size", "location", "output_type"))) |>
       tidyr::complete(target_end_date = actual_target_dates, .data[["output_type_id"]]) |>

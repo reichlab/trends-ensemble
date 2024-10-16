@@ -31,7 +31,7 @@ the date relative to which the targets are defined (usually Saturday for
 weekly targets)}
 
 \item{temporal_resolution}{'daily' or 'weekly'; specifies timescale of
-target_ts and horizons}
+\code{target_ts} and \code{horizons}}
 
 \item{horizons}{numeric vector of prediction horizons relative to
 the reference_date, e.g. 0:3 or 1:4}
@@ -66,4 +66,22 @@ possible values for each:
 \item window_size (integer), determines how many previous observations inform
 the forecast
 }
+
+Additionally, this function will return slightly different output forecasts
+depending on the relationship between the \code{reference_date}, requested \code{horizons},
+and dates contained within \code{target_ts}. There are three possible cases:
+\enumerate{
+\item The requested forecasts begin exactly one time unit (given by the
+temporal_resolution) after the last observed value. Here, no changes are
+made to the returned forecasts.
+\item The requested forecasts begin two or more time units after the last
+observed value. Here, the missing observed data between the last observed
+value in \code{target_ts} is imputed using that last observed value, then
+forecasts are computed as usual.
+\item The dates for the requested forecasts overlap partially or completely with
+observed values contained within \code{target_ts}. Here, any forecasted values
+for overlapping dates are replaced by the associated observed values.
+}
+
+Note that we warn for the second and third cases.
 }
