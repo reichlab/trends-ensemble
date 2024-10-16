@@ -105,7 +105,7 @@ fit_baselines_one_location <- function(model_variations,
     dplyr::bind_cols(model_variations, predictions) |>
     tidyr::unnest(cols = "forecasts") |>
     dplyr::mutate(
-      location = unique(target_ts$location),
+      location = target_ts$location[1], # note, target_ts contains data for just one location
       horizon = .data[["horizon"]],
       target_end_date = last_data_date + ts_temp_res * .data[["horizon"]],
       .before = "horizon"
