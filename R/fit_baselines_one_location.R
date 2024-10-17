@@ -44,8 +44,7 @@
 #'   3. The dates for the requested forecasts overlap partially or completely with
 #'      observed values contained within `target_ts`. Here, any forecasted values
 #'      for overlapping dates are replaced by the associated observed values.
-#'
-#' Note that we warn for the second and third cases.
+#'      (Note that we warn for this case.)
 #'
 #' @return data frame of a baseline forecast for one location, all models with
 #'   columns `transformation`, `symmetrize`, `window_size`, `horizon`,
@@ -116,6 +115,9 @@ fit_baselines_one_location <- function(model_variations,
         .before = "horizon"
       )
   } else if (h_adjustments > 0) { # all(effective_horizons) >= 2
+    # here extracted_outputs contains extra forecasts the user did not request
+    # (since we predict forward from the last observed value in target_ts),
+    # so we drop the unnecessary ones before returning the data frame
     model_outputs <- extracted_outputs |>
       dplyr::filter(.data[["horizon"]] %in% effective_horizons) |>
       dplyr::mutate(
@@ -123,11 +125,6 @@ fit_baselines_one_location <- function(model_variations,
         horizon = as.numeric((.data[["target_end_date"]] - as.Date(reference_date)) / ts_temp_res),
         .before = "horizon"
       )
-    cli::cli_warn(
-      "forecasts requested for a time index beyond the provided {.arg target_ts},
-      returned forecasts are predicted forward from last observed value on 
-      {.val {last_data_date}} and unnecessary ones are dropped"
-    )
   } else if (h_adjustments < 0) {
     # here extracted_outputs only contains forecasts not replaced by observed values
     # `complete()` adds the remaining rows to avoid unnecessary computations and

@@ -81,7 +81,6 @@ only forecasts for the requested dates.
 \item The dates for the requested forecasts overlap partially or completely with
 observed values contained within \code{target_ts}. Here, any forecasted values
 for overlapping dates are replaced by the associated observed values.
+(Note that we warn for this case.)
 }
-
-Note that we warn for the second and third cases.
 }

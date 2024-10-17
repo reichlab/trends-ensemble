@@ -54,7 +54,7 @@ test_that("provided temporal_resolution not matching that of target_ts throws an
 
 test_that(
   "predictions are forecasted starting from the last observed value;
-  those not requested by the user are removed and a warning is thrown", {
+  those not requested by the user are removed", {
     expected_outputs <- model_variations |>
       fit_baselines_one_location(
         target_ts,
@@ -70,20 +70,16 @@ test_that(
         horizon = .data[["horizon"]] - 1
       ) |>
       dplyr::filter(.data[["horizon"]] %in% 0:3)
-    expect_warning(
-      actual_outputs <- model_variations |>
-        fit_baselines_one_location(
-          target_ts,
-          reference_date = "2023-01-21",
-          temporal_resolution = "weekly",
-          horizons = 0:3,
-          quantile_levels = c(.1, .5, .9),
-          n_samples = NULL,
-          seed = 1234
-        ),
-      regexp = "forecasts requested for a time index beyond the provided `target_ts`",
-      fixed = TRUE
-    )
+    actual_outputs <- model_variations |>
+      fit_baselines_one_location(
+        target_ts,
+        reference_date = "2023-01-21",
+        temporal_resolution = "weekly",
+        horizons = 0:3,
+        quantile_levels = c(.1, .5, .9),
+        n_samples = NULL,
+        seed = 1234
+      )
     expect_equal(actual_outputs, expected_outputs, tolerance = 1e-3)
   }
 )
