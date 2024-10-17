@@ -52,34 +52,41 @@ test_that("provided temporal_resolution not matching that of target_ts throws an
 })
 
 
-test_that("missing target data is extrapolated with most recent observation and throws a warning", {
-  expected_outputs <- model_variations |>
-    fit_baselines_one_location(
-      target_ts |>
-        dplyr::add_row(location = "ak", time_index = as.Date("2023-01-14"), observation = 32),
-      reference_date = "2023-01-21",
-      temporal_resolution = "weekly",
-      horizons = 0:3,
-      quantile_levels = c(.1, .5, .9),
-      n_samples = NULL,
-      seed = 1234
-    )
-  expect_warning(
-    actual_outputs <- model_variations |>
+test_that(
+  "predictions are forecasted starting from the last observed value;
+  those not requested by the user are removed and a warning is thrown", {
+    expected_outputs <- model_variations |>
       fit_baselines_one_location(
         target_ts,
-        reference_date = "2023-01-21",
+        reference_date = "2023-01-14",
         temporal_resolution = "weekly",
-        horizons = 0:3,
+        horizons = 0:4,
         quantile_levels = c(.1, .5, .9),
         n_samples = NULL,
         seed = 1234
-      ),
-    regexp = "forecasts requested for a time index beyond the provided `target_ts`, replacing",
-    fixed = TRUE
-  )
-  expect_equal(actual_outputs, expected_outputs, tolerance = 1e-3)
-})
+      ) |>
+      dplyr::mutate(
+        reference_date = as.Date("2023-01-21"),
+        horizon = .data[["horizon"]] - 1
+      ) |>
+      dplyr::filter(.data[["horizon"]] %in% 0:3)
+    expect_warning(
+      actual_outputs <- model_variations |>
+        fit_baselines_one_location(
+          target_ts,
+          reference_date = "2023-01-21",
+          temporal_resolution = "weekly",
+          horizons = 0:3,
+          quantile_levels = c(.1, .5, .9),
+          n_samples = NULL,
+          seed = 1234
+        ),
+      regexp = "forecasts requested for a time index beyond the provided `target_ts`",
+      fixed = TRUE
+    )
+    expect_equal(actual_outputs, expected_outputs, tolerance = 1e-3)
+  }
+)
 
 test_that("overlapping forecasts are replaced with observed values and throws a warning", {
   expected_outputs <-

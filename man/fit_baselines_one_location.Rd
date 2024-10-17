@@ -75,9 +75,9 @@ and dates contained within \code{target_ts}. There are three possible cases:
 temporal_resolution) after the last observed value. Here, no changes are
 made to the returned forecasts.
 \item The requested forecasts begin two or more time units after the last
-observed value. Here, the missing observed data between the last observed
-value in \code{target_ts} is imputed using that last observed value, then
-forecasts are computed as usual.
+observed value. Here, we make predictions starting from the next time unit
+after the last observed value until the last requested date, returning
+only forecasts for the requested dates.
 \item The dates for the requested forecasts overlap partially or completely with
 observed values contained within \code{target_ts}. Here, any forecasted values
 for overlapping dates are replaced by the associated observed values.

@@ -38,9 +38,9 @@
 #'      temporal_resolution) after the last observed value. Here, no changes are
 #'      made to the returned forecasts.
 #'   2. The requested forecasts begin two or more time units after the last
-#'      observed value. Here, the missing observed data between the last observed
-#'      value in `target_ts` is imputed using that last observed value, then
-#'      forecasts are computed as usual.
+#'      observed value. Here, we make predictions starting from the next time unit
+#'      after the last observed value until the last requested date, returning
+#'      only forecasts for the requested dates.
 #'   3. The dates for the requested forecasts overlap partially or completely with
 #'      observed values contained within `target_ts`. Here, any forecasted values
 #'      for overlapping dates are replaced by the associated observed values.
@@ -84,25 +84,6 @@ fit_baselines_one_location <- function(model_variations,
   horizons_to_forecast <- 1:max(effective_horizons)
   h_adjustments <- min(effective_horizons) - 1
 
-  if (h_adjustments > 0) { # all(effective_horizons) >= 2
-    cli::cli_warn(
-      "forecasts requested for a time index beyond the provided {.arg target_ts},
-        replacing missing target data with {.val {h_adjustments}} target observations"
-    )
-    target_ts <- target_ts |>
-      dplyr::group_by(dplyr::across(c("location"))) |>
-      tidyr::complete(
-        time_index = unique(c(target_ts$time_index, last_data_date + h_adjustments * ts_temp_res)),
-        fill = list(observation = target_ts$observation[target_ts$time_index == last_data_date]),
-      )
-
-    # Update what to be forecasted
-    last_data_date <- max(target_ts$time_index)
-    effective_horizons <- as.integer(actual_target_dates - last_data_date) / ts_temp_res
-    horizons_to_forecast <- 1:max(effective_horizons)
-    h_adjustments <- min(effective_horizons) - 1 # now is 0
-  }
-
   # get predictions for all model_variations
   predictions <- purrr::pmap_dfr( #tibble, each 1x1 row contains predictions for 1 model
     model_variations,
@@ -134,6 +115,19 @@ fit_baselines_one_location <- function(model_variations,
         horizon = as.numeric((.data[["target_end_date"]] - as.Date(reference_date)) / ts_temp_res),
         .before = "horizon"
       )
+  } else if (h_adjustments > 0) { # all(effective_horizons) >= 2
+    model_outputs <- extracted_outputs |>
+      dplyr::filter(.data[["horizon"]] %in% effective_horizons) |>
+      dplyr::mutate(
+        reference_date = reference_date,
+        horizon = as.numeric((.data[["target_end_date"]] - as.Date(reference_date)) / ts_temp_res),
+        .before = "horizon"
+      )
+    cli::cli_warn(
+      "forecasts requested for a time index beyond the provided {.arg target_ts},
+      returned forecasts are predicted forward from last observed value on 
+      {.val {last_data_date}} and unnecessary ones are dropped"
+    )
   } else if (h_adjustments < 0) {
     # here extracted_outputs only contains forecasts not replaced by observed values
     # `complete()` adds the remaining rows to avoid unnecessary computations and
