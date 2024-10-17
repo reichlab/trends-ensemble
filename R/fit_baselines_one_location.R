@@ -78,7 +78,7 @@ fit_baselines_one_location <- function(model_variations,
 
   # figure out horizons to forecast
   reference_date <- lubridate::ymd(reference_date) # date to which horizons are relative
-  last_data_date <- max(target_ts$time_index) # last day of target date
+  last_data_date <- max(target_ts$time_index) # last day of target data
   actual_target_dates <- reference_date + ts_temp_res * horizons
   effective_horizons <- as.integer(actual_target_dates - last_data_date) / ts_temp_res
   horizons_to_forecast <- 1:max(effective_horizons)
