@@ -28,7 +28,7 @@ location}
 
 \item{reference_date}{string of the reference date for the forecasts, i.e.
 the date relative to which the targets are defined (usually Saturday for
-weekly targets)}
+weekly targets). Must be in the ymd format, with yyyy-mm-dd format recommended.}
 
 \item{temporal_resolution}{'daily' or 'weekly'; specifies timescale of
 \code{target_ts} and \code{horizons}}

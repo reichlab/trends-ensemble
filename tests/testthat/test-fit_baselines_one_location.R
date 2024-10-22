@@ -24,6 +24,32 @@ test_that("multiple locations in target data throws an error", {
     )
 })
 
+test_that("null reference date throws an error", {
+  fit_baselines_one_location(model_variations,
+                             target_ts,
+                             reference_date = NULL,
+                             temporal_resolution = "weekly",
+                             horizons = 0:3,
+                             quantile_levels = c(.1, .5, .9),
+                             n_samples = NULL) |>
+    expect_error(
+      regexp = "`reference_date` is missing", fixed = TRUE
+    )
+})
+
+test_that("invalid reference date format throws an error", {
+  fit_baselines_one_location(model_variations,
+                             target_ts,
+                             reference_date = "2023",
+                             temporal_resolution = "weekly",
+                             horizons = 0:3,
+                             quantile_levels = c(.1, .5, .9),
+                             n_samples = NULL) |>
+    expect_error(
+      regexp = "`reference_date` could not be correctly parsed.", fixed = TRUE
+    )
+})
+
 test_that("invalid temporal resolution throws an error", {
   fit_baselines_one_location(model_variations,
                              target_ts,

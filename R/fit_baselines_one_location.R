@@ -9,7 +9,7 @@
 #'   location
 #' @param reference_date string of the reference date for the forecasts, i.e.
 #'   the date relative to which the targets are defined (usually Saturday for
-#'   weekly targets)
+#'   weekly targets). Must be in the ymd format, with yyyy-mm-dd format recommended.
 #' @param temporal_resolution 'daily' or 'weekly'; specifies timescale of
 #'   `target_ts` and `horizons`
 #' @param horizons numeric vector of prediction horizons relative to
@@ -62,6 +62,14 @@ fit_baselines_one_location <- function(model_variations,
                                        round_predictions = FALSE,
                                        seed = NULL) {
 
+  if (is.null(reference_date)) {
+    cli::cli_abort("{.arg reference_date} is missing")
+  }
+  reference_date <- lubridate::ymd(reference_date, quiet = TRUE) # date to which horizons are relative
+  if (is.na(reference_date)) {
+    cli::cli_abort("{.arg reference_date} could not be correctly parsed. Please use the ymd format")
+  }
+
   valid_temp_res <- c("daily", "weekly")
   if (!(temporal_resolution %in% valid_temp_res && length(temporal_resolution)) == 1) {
     cli::cli_abort("{.arg temporal_resolution} must be only one of {.val valid_temp_res}")
@@ -76,7 +84,6 @@ fit_baselines_one_location <- function(model_variations,
   }
 
   # figure out horizons to forecast
-  reference_date <- lubridate::ymd(reference_date) # date to which horizons are relative
   last_data_date <- max(target_ts$time_index) # last day of target data
   actual_target_dates <- reference_date + ts_temp_res * horizons
   effective_horizons <- as.integer(actual_target_dates - last_data_date) / ts_temp_res
