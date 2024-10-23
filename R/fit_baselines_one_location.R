@@ -65,7 +65,8 @@ fit_baselines_one_location <- function(model_variations,
   if (length(reference_date) > 1) {
     cli::cli_abort("only one {.arg reference_date} may be provided")
   } else {
-    reference_date <- validate_ymd_date(reference_date, arg_name = "reference_date") # date to which horizons are relative
+    reference_date <- reference_date |> # date to which horizons are relative
+      validate_ymd_date(arg_name = "reference_date")
   }
 
   valid_temp_res <- c("daily", "weekly")
