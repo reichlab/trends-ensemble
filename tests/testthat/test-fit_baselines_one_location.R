@@ -50,6 +50,19 @@ test_that("invalid reference date format throws an error", {
     )
 })
 
+test_that("multiple reference dates throws an error", {
+  fit_baselines_one_location(model_variations,
+                             target_ts,
+                             reference_date = c("2023-01-07", "2023-01-14"),
+                             temporal_resolution = "weekly",
+                             horizons = 0:3,
+                             quantile_levels = c(.1, .5, .9),
+                             n_samples = NULL) |>
+    expect_error(
+      regexp = "only one `reference_date` may be provided", fixed = TRUE
+    )
+})
+
 test_that("invalid temporal resolution throws an error", {
   fit_baselines_one_location(model_variations,
                              target_ts,

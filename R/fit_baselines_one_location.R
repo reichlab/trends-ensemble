@@ -62,12 +62,10 @@ fit_baselines_one_location <- function(model_variations,
                                        round_predictions = FALSE,
                                        seed = NULL) {
 
-  if (is.null(reference_date)) {
-    cli::cli_abort("{.arg reference_date} is missing")
-  }
-  reference_date <- lubridate::ymd(reference_date, quiet = TRUE) # date to which horizons are relative
-  if (is.na(reference_date)) {
-    cli::cli_abort("{.arg reference_date} could not be correctly parsed. Please use the ymd format")
+  if (length(reference_date) > 1) {
+    cli::cli_abort("only one {.arg reference_date} may be provided")
+  } else {
+    reference_date <- validate_ymd_date(reference_date, arg_name = "reference_date") # date to which horizons are relative
   }
 
   valid_temp_res <- c("daily", "weekly")
