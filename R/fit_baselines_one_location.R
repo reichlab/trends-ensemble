@@ -152,17 +152,12 @@ fit_baselines_one_location <- function(model_variations,
       dplyr::mutate(
         value = ifelse(is.na(.data[["value"]]), .data[["observation"]], .data[["value"]])
       )
-    if (max(actual_target_dates) <= last_data_date) {
-      cli::cli_warn(
-        "all requested forecasts are for a time index within the provided {.arg target_ts},
-          replacing overlapping forecasts with {.val {length(horizons)}} target observations"
-      )
-    } else {
-      cli::cli_warn(
-        "forecasts requested for a time index within the provided {.arg target_ts},
-          replacing overlapping forecasts with {.val {abs(h_adjustments)}} target observations"
-      )
-    }
+
+    cli::cli_warn(
+      "forecasts requested for a time index within the provided {.arg target_ts},
+        replacing overlapping forecasts for {.val {abs(h_adjustments)}} horizons
+        with observed values"
+    )
   }
 
   model_outputs |>
