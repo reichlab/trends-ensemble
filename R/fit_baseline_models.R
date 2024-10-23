@@ -27,7 +27,7 @@ fit_baseline_models <- function(model_variations,
                                 round_predictions = FALSE,
                                 seed = NULL) {
   if (is.null(target)) {
-    cli::cli_abort("No {.arg target} provided; please provide one")
+    cli::cli_abort("{.arg target} is missing; please provide one")
   }
 
   # fit baseline models
