@@ -24,6 +24,18 @@ test_that("missing target throws an error", {
     )
 })
 
+test_that("output predictions is a model_out_tbl", {
+  baseline_outputs <- fit_baseline_models(model_variations,
+                                          target_ts,
+                                          reference_date = "2023-01-14",
+                                          temporal_resolution = "weekly",
+                                          horizons = 0:3,
+                                          target = "inc hosp",
+                                          quantile_levels = c(.1, .5, .9),
+                                          n_samples = NULL)
+  expect_s3_class(baseline_outputs, "model_out_tbl")
+})
+
 test_that("model IDs are as expected", {
   expected_model_ids <- paste("UMass-baseline", "none", "sym", c(3, 4), "weekly", sep = "_")
   actual_model_ids <- fit_baseline_models(model_variations,
