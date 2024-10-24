@@ -90,18 +90,19 @@ fit_baselines_one_location <- function(model_variations,
   h_adjustments <- min(effective_horizons) - 1
 
   # get predictions for all model_variations
-  predictions <- purrr::pmap_dfr( #tibble, each 1x1 row contains predictions for 1 model
-    model_variations,
-    get_baseline_predictions,
-    target_ts = target_ts,
-    effective_horizons = horizons_to_forecast,
-    origin = ifelse(temporal_resolution == "weekly", "obs", "median"),
-    n_sim = 100000,
-    quantile_levels = quantile_levels,
-    n_samples = n_samples,
-    round_predictions = round_predictions,
-    seed = seed
-  )
+  predictions <- model_variations |>
+    purrr::pmap( #tibble, each 1x1 row contains predictions for 1 model
+      get_baseline_predictions,
+      target_ts = target_ts,
+      effective_horizons = horizons_to_forecast,
+      origin = ifelse(temporal_resolution == "weekly", "obs", "median"),
+      n_sim = 100000,
+      quantile_levels = quantile_levels,
+      n_samples = n_samples,
+      round_predictions = round_predictions,
+      seed = seed
+    ) |>
+    purrr::list_rbind()
 
   # extract forecasts
   extracted_outputs <-
