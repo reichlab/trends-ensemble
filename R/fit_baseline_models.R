@@ -31,7 +31,6 @@ fit_baseline_models <- function(model_variations,
   }
 
   # fit baseline models
-  #furrr::future_pmap_dfr(
   purrr::map(
     unique(target_ts$location),
     function(fips_code) {
