@@ -16,6 +16,7 @@
 #'
 #' @importFrom rlang .data
 #'
+#' @export
 fit_baseline_models <- function(model_variations,
                                 target_ts,
                                 reference_date,
