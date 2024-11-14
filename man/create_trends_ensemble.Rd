@@ -21,7 +21,7 @@ create_trends_ensemble(
 \arguments{
 \item{component_variations}{a \code{data.frame} where each row specifies a set of
 hyperparameters to use for a single baseline model fit, with columns
-\code{transformation}, \code{symmetrize}, \code{window_size}, and \code{temporal_horizon}.
+\code{transformation}, \code{symmetrize}, \code{window_size}, and \code{temporal_resolution}.
 See details for more information}
 
 \item{target_ts}{a \code{data.frame} of target data in a time series format

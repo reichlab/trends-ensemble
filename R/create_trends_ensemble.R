@@ -3,7 +3,7 @@
 #'
 #' @param component_variations a `data.frame` where each row specifies a set of
 #'   hyperparameters to use for a single baseline model fit, with columns
-#'   `transformation`, `symmetrize`, `window_size`, and `temporal_horizon`.
+#'   `transformation`, `symmetrize`, `window_size`, and `temporal_resolution`.
 #'   See details for more information
 #' @param target_ts a `data.frame` of target data in a time series format
 #'   (contains columns `time_index`, `location`, and `observation`) for a single
