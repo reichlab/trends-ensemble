@@ -32,6 +32,7 @@ test_that("missing or extraneous columns in component_variations throws an error
                            reference_date = "2022-12-10",
                            horizons = -6:21,
                            target = "inc hosp",
+                           n_sim = 10000,
                            quantile_levels = c(.1, .5, .9),
                            n_samples = NULL,
                            return_baseline_predictions = FALSE) |>
@@ -44,6 +45,7 @@ test_that("missing or extraneous columns in component_variations throws an error
                            reference_date = "2022-12-10",
                            horizons = -6:21,
                            target = "inc hosp",
+                           n_sim = 10000,
                            quantile_levels = c(.1, .5, .9),
                            n_samples = NULL,
                            return_baseline_predictions = FALSE) |>
@@ -59,6 +61,7 @@ test_that("unsupported temporal_resolution values in component_variations throws
                            reference_date = "2022-12-10",
                            horizons = -6:21,
                            target = "inc hosp",
+                           n_sim = 10000,
                            quantile_levels = c(.1, .5, .9),
                            n_samples = NULL,
                            return_baseline_predictions = FALSE) |>
@@ -73,6 +76,7 @@ test_that("multiple temporal_resolution values in component_variations throws an
                            reference_date = "2022-12-10",
                            horizons = -6:21,
                            target = "inc hosp",
+                           n_sim = 10000,
                            quantile_levels = c(.1, .5, .9),
                            n_samples = NULL,
                            return_baseline_predictions = FALSE) |>
@@ -86,6 +90,7 @@ test_that("providing target_ts that cannot be aggregated to match all requested 
                            reference_date = "2022-12-10",
                            horizons = -6:21,
                            target = "inc hosp",
+                           n_sim = 10000,
                            quantile_levels = c(.1, .5, .9),
                            n_samples = NULL,
                            return_baseline_predictions = FALSE) |>
@@ -113,6 +118,7 @@ test_that("component outputs are correctly calculated", {
     temporal_resolution = "daily",
     horizons = -6:21,
     target = "inc hosp",
+    n_sim = 10000,
     quantile_levels = c(.1, .5, .9),
     n_samples = 100,
     seed = 1234
@@ -124,6 +130,7 @@ test_that("component outputs are correctly calculated", {
     temporal_resolution = "weekly",
     horizons = 0:3,
     target = "inc hosp",
+    n_sim = 10000,
     quantile_levels = c(.1, .5, .9),
     n_samples = 100,
     seed = 1234
@@ -134,6 +141,7 @@ test_that("component outputs are correctly calculated", {
                            reference_date = "2022-12-10",
                            horizons = -6:21,
                            target = "inc hosp",
+                           n_sim = 10000,
                            quantile_levels = c(.1, .5, .9),
                            n_samples = 100,
                            seed = 1234,
@@ -144,6 +152,7 @@ test_that("component outputs are correctly calculated", {
                            reference_date = "2022-12-10",
                            horizons = 0:3,
                            target = "inc hosp",
+                           n_sim = 10000,
                            quantile_levels = c(.1, .5, .9),
                            n_samples = 100,
                            seed = 1234,
@@ -160,6 +169,7 @@ test_that("ensemble is correctly calculated", {
                            reference_date = "2022-12-10",
                            horizons = -6:21,
                            target = "inc hosp",
+                           n_sim = 10000,
                            quantile_levels = c(.1, .5, .9),
                            n_samples = 1000,
                            return_baseline_predictions = TRUE)
@@ -168,6 +178,7 @@ test_that("ensemble is correctly calculated", {
                            reference_date = "2022-12-10",
                            horizons = 0:3,
                            target = "inc hosp",
+                           n_sim = 10000,
                            quantile_levels = c(.1, .5, .9),
                            n_samples = 1000,
                            return_baseline_predictions = TRUE)

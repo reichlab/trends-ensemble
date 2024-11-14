@@ -11,6 +11,7 @@ create_trends_ensemble(
   reference_date,
   horizons,
   target,
+  n_sim = 10000,
   quantile_levels,
   n_samples = NULL,
   round_predictions = FALSE,
@@ -37,6 +38,8 @@ the reference_date, e.g. 0:3 or 1:4, and interpreted to be in terms of the
 same temporal resolution as the provided \code{target_ts}.}
 
 \item{target}{character string specifying the name of the prediction target}
+
+\item{n_sim}{integer number of simulations to predict. Defaults to 100000.}
 
 \item{quantile_levels}{numeric vector of quantile levels to output; set to NULL
 if quantile outputs not requested. Defaults to NULL.}

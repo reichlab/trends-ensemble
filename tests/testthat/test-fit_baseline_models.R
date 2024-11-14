@@ -17,6 +17,7 @@ test_that("missing target throws an error", {
                       temporal_resolution = "weekly",
                       horizons = 0:3,
                       target = NULL,
+                      n_sim = 10000,
                       quantile_levels = c(.1, .5, .9),
                       n_samples = NULL) |>
     expect_error(
@@ -31,6 +32,7 @@ test_that("output predictions is a model_out_tbl", {
                                           temporal_resolution = "weekly",
                                           horizons = 0:3,
                                           target = "inc hosp",
+                                          n_sim = 10000,
                                           quantile_levels = c(.1, .5, .9),
                                           n_samples = NULL)
   expect_s3_class(baseline_outputs, "model_out_tbl")
@@ -44,6 +46,7 @@ test_that("model IDs are as expected", {
                                           temporal_resolution = "weekly",
                                           horizons = 0:3,
                                           target = "inc hosp",
+                                          n_sim = 10000,
                                           quantile_levels = c(.1, .5, .9),
                                           n_samples = NULL) |>
     dplyr::pull(.data[["model_id"]]) |>
@@ -60,6 +63,7 @@ test_that("mapping over locations works as expected", {
         reference_date = "2023-01-14",
         temporal_resolution = "weekly",
         horizons = 0:3,
+        n_sim = 10000,
         quantile_levels = c(.1, .5, .9),
         n_samples = NULL,
         seed = 1234
@@ -70,6 +74,7 @@ test_that("mapping over locations works as expected", {
         reference_date = "2023-01-14",
         temporal_resolution = "weekly",
         horizons = 0:3,
+        n_sim = 10000,
         quantile_levels = c(.1, .5, .9),
         n_samples = NULL,
         seed = 1234
@@ -98,6 +103,7 @@ test_that("mapping over locations works as expected", {
                                         reference_date = "2023-01-14",
                                         temporal_resolution = "weekly",
                                         horizons = 0:3,
+                                        n_sim = 10000,
                                         target = "inc hosp",
                                         quantile_levels = c(.1, .5, .9),
                                         n_samples = NULL,

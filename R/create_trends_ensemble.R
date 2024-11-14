@@ -15,6 +15,7 @@
 #'   the reference_date, e.g. 0:3 or 1:4, and interpreted to be in terms of the
 #'   same temporal resolution as the provided `target_ts`.
 #' @param target character string specifying the name of the prediction target
+#' @param n_sim integer number of simulations to predict. Defaults to 100000.
 #' @param quantile_levels numeric vector of quantile levels to output; set to NULL
 #'   if quantile outputs not requested. Defaults to NULL.
 #' @param n_samples integer of amount of samples to output (and predict);
@@ -54,6 +55,7 @@ create_trends_ensemble <- function(component_variations,
                                    reference_date,
                                    horizons,
                                    target,
+                                   n_sim = 10000,
                                    quantile_levels,
                                    n_samples = NULL,
                                    round_predictions = FALSE,
@@ -104,6 +106,7 @@ create_trends_ensemble <- function(component_variations,
                               current_temp_res$name,
                               new_horizon_min:new_horizon_max,
                               target,
+                              n_sim = n_sim,
                               quantile_levels,
                               n_samples,
                               round_predictions,
@@ -116,6 +119,7 @@ create_trends_ensemble <- function(component_variations,
                               current_temp_res$name[1],
                               horizons,
                               target,
+                              n_sim = n_sim,
                               quantile_levels,
                               n_samples,
                               round_predictions,

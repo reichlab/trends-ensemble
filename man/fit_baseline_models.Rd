@@ -11,6 +11,7 @@ fit_baseline_models(
   temporal_resolution,
   horizons,
   target,
+  n_sim = 10000,
   quantile_levels,
   n_samples,
   round_predictions = FALSE,
@@ -38,6 +39,8 @@ weekly targets). Must be in the ymd format, with yyyy-mm-dd format recommended.}
 the reference_date, e.g. 0:3 or 1:4}
 
 \item{target}{character string specifying the name of the prediction target}
+
+\item{n_sim}{integer number of simulations to predict. Defaults to 100000.}
 
 \item{quantile_levels}{numeric vector of quantile levels to output; set to NULL
 if quantile outputs not requested. Defaults to NULL.}
