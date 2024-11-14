@@ -14,9 +14,10 @@
 #'   `target_ts` and `horizons`
 #' @param horizons numeric vector of prediction horizons relative to
 #'   the reference_date, e.g. 0:3 or 1:4
+#' @param n_sim integer number of simulations to predict. Defaults to 100000.
 #' @param quantile_levels numeric vector of quantile levels to output; set to NULL
 #'   if quantile outputs not requested. Defaults to NULL.
-#' @param n_samples integer of amount of samples to output (and predict);
+#' @param n_samples integer of amount of samples to output;
 #'   set to NULL if sample outputs not requested (in this case 100000 samples
 #'   are generated from which to extract quantiles). Defaults to NULL.
 #' @param round_predictions boolean specifying whether to round the output
@@ -57,6 +58,7 @@ fit_baselines_one_location <- function(model_variations,
                                        reference_date,
                                        temporal_resolution,
                                        horizons,
+                                       n_sim = 10000,
                                        quantile_levels,
                                        n_samples,
                                        round_predictions = FALSE,
@@ -96,7 +98,7 @@ fit_baselines_one_location <- function(model_variations,
       target_ts = target_ts,
       effective_horizons = horizons_to_forecast,
       origin = ifelse(temporal_resolution == "weekly", "obs", "median"),
-      n_sim = 100000,
+      n_sim = n_sim,
       quantile_levels = quantile_levels,
       n_samples = n_samples,
       round_predictions = round_predictions,

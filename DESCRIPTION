@@ -31,6 +31,7 @@ RoxygenNote: 7.3.2
 Imports:
     cli,
     dplyr,
+    hubEnsembles,
     hubUtils,
     purrr,
     rlang,
@@ -38,6 +39,7 @@ Imports:
     tibble,
     tidyr
 Remotes: 
+    hubverse-org/hubEnsembles,
     reichlab/simplets
 Suggests: 
     car,

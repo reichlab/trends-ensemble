@@ -10,6 +10,7 @@ fit_baselines_one_location(
   reference_date,
   temporal_resolution,
   horizons,
+  n_sim = 10000,
   quantile_levels,
   n_samples,
   round_predictions = FALSE,
@@ -36,10 +37,12 @@ weekly targets). Must be in the ymd format, with yyyy-mm-dd format recommended.}
 \item{horizons}{numeric vector of prediction horizons relative to
 the reference_date, e.g. 0:3 or 1:4}
 
+\item{n_sim}{integer number of simulations to predict. Defaults to 100000.}
+
 \item{quantile_levels}{numeric vector of quantile levels to output; set to NULL
 if quantile outputs not requested. Defaults to NULL.}
 
-\item{n_samples}{integer of amount of samples to output (and predict);
+\item{n_samples}{integer of amount of samples to output;
 set to NULL if sample outputs not requested (in this case 100000 samples
 are generated from which to extract quantiles). Defaults to NULL.}
 

@@ -17,6 +17,7 @@ test_that("multiple locations in target data throws an error", {
                              reference_date = "2023-01-14",
                              temporal_resolution = "weekly",
                              horizons = 0:3,
+                             n_sim = 10000,
                              quantile_levels = c(.1, .5, .9),
                              n_samples = NULL) |>
     expect_error(
@@ -30,6 +31,7 @@ test_that("null reference date throws an error", {
                              reference_date = NULL,
                              temporal_resolution = "weekly",
                              horizons = 0:3,
+                             n_sim = 10000,
                              quantile_levels = c(.1, .5, .9),
                              n_samples = NULL) |>
     expect_error(
@@ -43,6 +45,7 @@ test_that("invalid reference date format throws an error", {
                              reference_date = "2023",
                              temporal_resolution = "weekly",
                              horizons = 0:3,
+                             n_sim = 10000,
                              quantile_levels = c(.1, .5, .9),
                              n_samples = NULL) |>
     expect_error(
@@ -56,6 +59,7 @@ test_that("multiple reference dates throws an error", {
                              reference_date = c("2023-01-07", "2023-01-14"),
                              temporal_resolution = "weekly",
                              horizons = 0:3,
+                             n_sim = 10000,
                              quantile_levels = c(.1, .5, .9),
                              n_samples = NULL) |>
     expect_error(
@@ -69,6 +73,7 @@ test_that("invalid temporal resolution throws an error", {
                              reference_date = "2023-01-14",
                              temporal_resolution = "monthly",
                              horizons = 0:3,
+                             n_sim = 10000,
                              quantile_levels = c(.1, .5, .9),
                              n_samples = NULL) |>
     expect_error(
@@ -82,6 +87,7 @@ test_that("provided temporal_resolution not matching that of target_ts throws an
                              reference_date = "2023-01-14",
                              temporal_resolution = "daily",
                              horizons = 0:3,
+                             n_sim = 10000,
                              quantile_levels = c(.1, .5, .9),
                              n_samples = NULL) |>
     expect_error(
@@ -100,6 +106,7 @@ test_that(
         reference_date = "2023-01-14",
         temporal_resolution = "weekly",
         horizons = 0:4,
+        n_sim = 10000,
         quantile_levels = c(.1, .5, .9),
         n_samples = NULL,
         seed = 1234
@@ -115,6 +122,7 @@ test_that(
         reference_date = "2023-01-21",
         temporal_resolution = "weekly",
         horizons = 0:3,
+        n_sim = 10000,
         quantile_levels = c(.1, .5, .9),
         n_samples = NULL,
         seed = 1234
@@ -139,6 +147,7 @@ test_that("overlapping forecasts are replaced with observed values and throws a 
         reference_date = "2023-01-14",
         temporal_resolution = "weekly",
         horizons = 0:2,
+        n_sim = 10000,
         quantile_levels = c(.1, .5, .9),
         n_samples = NULL,
         seed = 1234
@@ -158,6 +167,7 @@ test_that("overlapping forecasts are replaced with observed values and throws a 
         reference_date = "2023-01-07",
         temporal_resolution = "weekly",
         horizons = 0:3,
+        n_sim = 10000,
         quantile_levels = c(.1, .5, .9),
         n_samples = NULL,
         seed = 1234
