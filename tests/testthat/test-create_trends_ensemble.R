@@ -25,6 +25,32 @@ daily_ts$observation[daily_ts$location == "al"] <-
   c(27, 19, 20, 16, 19, 22, 20, 21, 18, 25, 17, 25, 27, 22,
     15, 32, 21, 26, 18, 14, 14, 14, 24, 23, 16, 20, 14, 44)
 
+
+test_that("missing or extraneous columns in component_variations throws an error", {
+  daily_variations[, 1] |>
+    create_trends_ensemble(daily_ts,
+                           reference_date = "2022-12-10",
+                           horizons = -6:21,
+                           target = "inc hosp",
+                           quantile_levels = c(.1, .5, .9),
+                           n_samples = NULL,
+                           return_baseline_predictions = FALSE) |>
+    expect_error(regex = "`component_variations` is missing the column",
+                 fixed = TRUE)
+
+  daily_variations |>
+    dplyr::mutate(horizons = 28) |>
+    create_trends_ensemble(daily_ts,
+                           reference_date = "2022-12-10",
+                           horizons = -6:21,
+                           target = "inc hosp",
+                           quantile_levels = c(.1, .5, .9),
+                           n_samples = NULL,
+                           return_baseline_predictions = FALSE) |>
+    expect_error(regex = "`component_variations` contains the extra column",
+                 fixed = TRUE)
+})
+
 test_that("unsupported temporal_resolution values in component_variations throws an error", {
   daily_variations |>
     dplyr::mutate(temporal_resolution = "monthly") |>

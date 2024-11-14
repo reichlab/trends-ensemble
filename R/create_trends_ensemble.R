@@ -12,7 +12,8 @@
 #'   the date relative to which the targets are defined (usually Saturday for
 #'   weekly targets). Must be in the ymd format, with yyyy-mm-dd format recommended.
 #' @param horizons numeric vector of prediction horizons relative to
-#'   the reference_date, e.g. 0:3 or 1:4
+#'   the reference_date, e.g. 0:3 or 1:4, and interpreted to be in terms of the
+#'   same temporal resolution as the provided `target_ts`.
 #' @param target character string specifying the name of the prediction target
 #' @param quantile_levels numeric vector of quantile levels to output; set to NULL
 #'   if quantile outputs not requested. Defaults to NULL.
@@ -58,6 +59,9 @@ create_trends_ensemble <- function(component_variations,
                                    round_predictions = FALSE,
                                    seed = NULL,
                                    return_baseline_predictions = FALSE) {
+  cv_col <- c("transformation", "symmetrize", "window_size", "temporal_resolution")
+  validate_colnames(component_variations, cv_col, "component_variations")
+
   valid_temp_res <- c("daily", "weekly")
   temp_res_variations <- component_variations |>
     dplyr::distinct(name = .data[["temporal_resolution"]], .keep_all = FALSE) |>

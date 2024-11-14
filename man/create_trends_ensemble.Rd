@@ -33,7 +33,8 @@ the date relative to which the targets are defined (usually Saturday for
 weekly targets). Must be in the ymd format, with yyyy-mm-dd format recommended.}
 
 \item{horizons}{numeric vector of prediction horizons relative to
-the reference_date, e.g. 0:3 or 1:4}
+the reference_date, e.g. 0:3 or 1:4, and interpreted to be in terms of the
+same temporal resolution as the provided \code{target_ts}.}
 
 \item{target}{character string specifying the name of the prediction target}
 
