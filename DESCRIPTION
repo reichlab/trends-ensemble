@@ -39,6 +39,7 @@ Imports:
     tibble,
     tidyr
 Remotes: 
+    hubverse-org/hubEnsembles,
     reichlab/simplets
 Suggests: 
     car,
