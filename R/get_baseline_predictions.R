@@ -59,7 +59,8 @@ get_baseline_predictions <- function(target_ts,
 
   validate_integer(n_sim, "n_sim")
 
-  if (any(quantile_levels > 1) || any(quantile_levels < 0)) {
+  if ((!is.numeric(quantile_levels) && !is.null(quantile_levels)) ||
+        (any(quantile_levels > 1) || any(quantile_levels < 0))) {
     cli::cli_abort("{.arg quantile_levels} must only contain values between 0 and 1.")
   }
 
@@ -68,10 +69,10 @@ get_baseline_predictions <- function(target_ts,
     if (n_samples > n_sim) {
       cli::cli_abort("{.arg n_samples} must be less than or equal to {.arg n_sim}")
     }
-  }
-
-  if (is.null(quantile_levels) && is.null(n_samples)) {
-    cli::cli_abort("No forecasts requested: both `quantile_levels` and `n_samples` are NULL")
+  } else {
+    if (is.null(quantile_levels)) {
+      cli::cli_abort("No forecasts requested: both `quantile_levels` and `n_samples` are NULL")
+    }
   }
 
   if (!is.null(seed)) set.seed(seed)
