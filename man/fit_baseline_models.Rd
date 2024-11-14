@@ -42,7 +42,7 @@ the reference_date, e.g. 0:3 or 1:4}
 \item{quantile_levels}{numeric vector of quantile levels to output; set to NULL
 if quantile outputs not requested. Defaults to NULL.}
 
-\item{n_samples}{integer of amount of samples to output (and predict);
+\item{n_samples}{integer of amount of samples to output;
 set to NULL if sample outputs not requested (in this case 100000 samples
 are generated from which to extract quantiles). Defaults to NULL.}
 

@@ -16,7 +16,7 @@
 #'   the reference_date, e.g. 0:3 or 1:4
 #' @param quantile_levels numeric vector of quantile levels to output; set to NULL
 #'   if quantile outputs not requested. Defaults to NULL.
-#' @param n_samples integer of amount of samples to output (and predict);
+#' @param n_samples integer of amount of samples to output;
 #'   set to NULL if sample outputs not requested (in this case 100000 samples
 #'   are generated from which to extract quantiles). Defaults to NULL.
 #' @param round_predictions boolean specifying whether to round the output
