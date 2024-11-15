@@ -2,10 +2,15 @@
 % Please edit documentation in R/save_model_out_tbl.R
 \name{save_model_out_tbl}
 \alias{save_model_out_tbl}
-\title{Save the contents of a model_out_tbl as a CSV to a model-specific directory
-inside the specified path.}
+\title{Save the contents of a model_out_tbl as a CSV or parquet to a model-specific
+directory inside the specified path.}
 \usage{
-save_model_out_tbl(model_out_tbl, round_id_col = "reference_date", path = ".")
+save_model_out_tbl(
+  model_out_tbl,
+  round_id_col = "reference_date",
+  path = ".",
+  extension = "csv"
+)
 }
 \arguments{
 \item{model_out_tbl}{an object of class \code{model_out_tbl} with component
@@ -20,8 +25,12 @@ specifies the round ID}
 \item{path}{a character string giving the path where the model-specific
 directories will be created, named for each model ID. Defaults to the current
 working directory.}
+
+\item{extension}{a character string of the file type to save the model_out_tbl
+to. May be one of "csv", "pqt", or "parquet" (different capitalizations will be
+coerced). Defaults to "csv".}
 }
 \description{
-Save the contents of a model_out_tbl as a CSV to a model-specific directory
-inside the specified path.
+Save the contents of a model_out_tbl as a CSV or parquet to a model-specific
+directory inside the specified path.
 }

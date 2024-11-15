@@ -1,5 +1,5 @@
-#' Save the contents of a model_out_tbl as a CSV to a model-specific directory
-#' inside the specified path.
+#' Save the contents of a model_out_tbl as a CSV or parquet to a model-specific
+#' directory inside the specified path.
 #'
 #' @param model_out_tbl an object of class `model_out_tbl` with component
 #'   model outputs (e.g., predictions). If it contains multiple models, the results
@@ -11,11 +11,14 @@
 #' @param path a character string giving the path where the model-specific
 #'   directories will be created, named for each model ID. Defaults to the current
 #'   working directory.
+#' @param extension a character string of the file type to save the model_out_tbl
+#'   to. May be one of "csv", "pqt", or "parquet" (different capitalizations will be
+#'   coerced). Defaults to "csv".
 #'
 #' @return NULL
 #'
 #' @export
-save_model_out_tbl <- function(model_out_tbl, round_id_col = "reference_date", path = ".") {
+save_model_out_tbl <- function(model_out_tbl, round_id_col = "reference_date", path = ".", extension = "csv") {
   if (!inherits(model_out_tbl, "model_out_tbl")) {
     model_out_tbl <- hubUtils::as_model_out_tbl(model_out_tbl)
   }
@@ -32,6 +35,12 @@ save_model_out_tbl <- function(model_out_tbl, round_id_col = "reference_date", p
   }
   model_names <- unique(model_out_tbl$model_id)
 
+  valid_extensions <- c("csv", "parquet", "pqt")
+  extension <- tolower(extension)
+  if (!extension %in% valid_extensions || length(extension) != 1) {
+    cli::cli_abort("Please provide a valid {.arg extension}, which may be one of {.val {valid_extensions}}")
+  }
+
   # save all the component models in hub verse format
   model_names |>
     purrr::walk(.f = function(model_id) {
@@ -40,13 +49,18 @@ save_model_out_tbl <- function(model_out_tbl, round_id_col = "reference_date", p
 
       results_path <- file.path(
         model_folder,
-        paste0(round_id_value, "-", model_id, ".csv")
+        paste0(round_id_value, "-", model_id, ".", extension)
       )
 
-      model_out_tbl |>
+      model_outputs <- model_out_tbl |>
         dplyr::filter(.data[["model_id"]] == model_id) |>
-        dplyr::select(-"model_id") |>
-        utils::write.csv(file = results_path, row.names = FALSE)
+        dplyr::select(-"model_id")
+
+      if (extension == "csv") {
+        utils::write.csv(model_outputs, file = results_path, row.names = FALSE)
+      } else if (extension == "parquet") {
+        arrow::write_parquet(model_outputs, sink = results_path)
+      }
     })
 
 }

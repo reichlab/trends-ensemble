@@ -31,7 +31,7 @@ v8_9 <- model_outputs$value[model_outputs$location == "888" &
 
 test_that("Mismatched round_id_col throws an error", {
   model_outputs |>
-    save_model_out_tbl(round_id_col = "forecast_date") |>
+    save_model_out_tbl(round_id_col = "forecast_date", extension = "csv") |>
     expect_error(regex = "No column named \"forecast_date\" in `model_out_tbl`",
                  fixed = TRUE)
 })
@@ -40,20 +40,24 @@ test_that("Multiple round_id values in the provided model_out_tbl throws an erro
   model_outputs |>
     dplyr::mutate(reference_date = reference_date - 7L) |>
     dplyr::bind_rows(model_outputs) |>
-    save_model_out_tbl(round_id_col = "reference_date") |>
+    save_model_out_tbl(round_id_col = "reference_date", extension = "csv") |>
     expect_error(
       regex = "Saving a `model_out_tbl` containing more than one unique \"reference_date\" value is not recommended",
       fixed = TRUE
     )
 })
 
-test_that("Multiple round_id values in the provided model_out_tbl throws an error", {
+test_that("Invalid extension throws an error", {
   model_outputs |>
-    dplyr::mutate(reference_date = reference_date - 7L) |>
-    dplyr::bind_rows(model_outputs) |>
-    save_model_out_tbl(round_id_col = "reference_date") |>
+    save_model_out_tbl(round_id_col = "reference_date", extension = "pdf") |>
     expect_error(
-      regex = "Saving a `model_out_tbl` containing more than one unique \"reference_date\" value is not recommended",
+      regex = "Please provide a valid `extension`, which may be one of",
       fixed = TRUE
     )
+})
+
+test_that("Capitalized valid extension does not throw an error", {
+  model_outputs |>
+    save_model_out_tbl(round_id_col = "reference_date", path = tempdir(), extension = "PARQUET") |>
+    expect_no_error()
 })
