@@ -1,11 +1,16 @@
-#' Save the results of a model_out_tbl as a CSV to the specified path
+#' Save the contents of a model_out_tbl as a CSV to a model-specific directory
+#' inside the specified path.
 #'
 #' @param model_out_tbl an object of class `model_out_tbl` with component
-#'   model outputs (e.g., predictions).
+#'   model outputs (e.g., predictions). If it contains multiple models, the results
+#'   of each model will be saved to a separate file in individual directories.
+#'   May only contain a single value in the round_id column, which is used to name
+#'   the output file.
 #' @param round_id_col a character string giving the name of the column that
 #'   specifies the round ID
-#' @param path a character string giving the path where the model outputs will
-#'   be saved. Defaults to the current working directory.
+#' @param path a character string giving the path where the model-specific
+#'   directories will be created, named for each model ID. Defaults to the current
+#'   working directory.
 #'
 #' @return NULL
 #'
