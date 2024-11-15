@@ -2,4 +2,5 @@
 
 export(create_trends_ensemble)
 export(fit_baseline_models)
+export(save_model_out_tbl)
 importFrom(rlang,.data)
