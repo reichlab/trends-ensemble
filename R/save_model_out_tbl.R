@@ -22,8 +22,8 @@ save_model_out_tbl <- function(model_out_tbl, round_id_col = "reference_date", p
 
   round_id_value <- unique(model_out_tbl[[round_id_col]])
   if (length(round_id_value) != 1) {
-    cli::cli_warn("Saving a model_out_tbl containing more than one unique 
-                  {.arg round_id_col} value is not recommended.")
+    cli::cli_abort("Saving a {.arg model_out_tbl} containing more than one unique 
+                   {.val {round_id_col}} value is not recommended.")
   }
   model_names <- unique(model_out_tbl$model_id)
 
