@@ -1,6 +1,8 @@
 #' Generate predictions for all baseline models for the given reference date
 #'
 #' @inheritParams fit_baselines_one_location
+#' @param target_ts a `data.frame` of target data in a time series format
+#'   (contains columns `time_index`, `location`, and `observation`)
 #' @param target character string specifying the name of the prediction target
 #'
 #' @details The `model_variations` data frame has the following columns and

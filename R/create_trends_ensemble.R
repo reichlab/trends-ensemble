@@ -1,30 +1,14 @@
 #' Generate predictions for the trends ensemble, a quantile median of component
 #' baseline models
 #'
+#' @inheritParams fit_baseline_models
 #' @param component_variations a `data.frame` where each row specifies a set of
 #'   hyperparameters to use for a single baseline model fit, with columns
 #'   `transformation`, `symmetrize`, `window_size`, and `temporal_resolution`.
 #'   See details for more information
-#' @param target_ts a `data.frame` of target data in a time series format
-#'   (contains columns `time_index`, `location`, and `observation`) for a single
-#'   location
-#' @param reference_date string of the reference date for the forecasts, i.e.
-#'   the date relative to which the targets are defined (usually Saturday for
-#'   weekly targets). Must be in the ymd format, with yyyy-mm-dd format recommended.
 #' @param horizons numeric vector of prediction horizons relative to
 #'   the reference_date, e.g. 0:3 or 1:4, and interpreted to be in terms of the
 #'   same temporal resolution as the provided `target_ts`.
-#' @param target character string specifying the name of the prediction target
-#' @param n_sim integer number of simulations to predict. Defaults to 100000.
-#' @param quantile_levels numeric vector of quantile levels to output; set to NULL
-#'   if quantile outputs not requested. Defaults to NULL.
-#' @param n_samples integer of amount of samples to output (and predict);
-#'   set to NULL if sample outputs not requested (in this case 100000 samples
-#'   are generated from which to extract quantiles). Defaults to NULL.
-#' @param round_predictions boolean specifying whether to round the output
-#'   predictions to the nearest whole number. Defaults to FALSE
-#' @param seed integer specifying a seed to set for reproducible results.
-#'   Defaults to NULL, in which case no seed is set.
 #' @param return_baseline_predictions boolean specifying whether to the component
 #'   baseline models' forecasts in addition to the trends ensemble forecasts.
 #'   If TRUE, a two-item list will be returned containing a labeled model_out_tbl

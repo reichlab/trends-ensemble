@@ -26,8 +26,7 @@ hyperparameters to use for a single baseline model fit, with columns
 See details for more information}
 
 \item{target_ts}{a \code{data.frame} of target data in a time series format
-(contains columns \code{time_index}, \code{location}, and \code{observation}) for a single
-location}
+(contains columns \code{time_index}, \code{location}, and \code{observation})}
 
 \item{reference_date}{string of the reference date for the forecasts, i.e.
 the date relative to which the targets are defined (usually Saturday for
@@ -44,7 +43,7 @@ same temporal resolution as the provided \code{target_ts}.}
 \item{quantile_levels}{numeric vector of quantile levels to output; set to NULL
 if quantile outputs not requested. Defaults to NULL.}
 
-\item{n_samples}{integer of amount of samples to output (and predict);
+\item{n_samples}{integer of amount of samples to output;
 set to NULL if sample outputs not requested (in this case 100000 samples
 are generated from which to extract quantiles). Defaults to NULL.}
 

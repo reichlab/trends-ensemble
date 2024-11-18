@@ -25,8 +25,7 @@ hyperparameters to use for a single baseline model fit, with columns
 information}
 
 \item{target_ts}{a \code{data.frame} of target data in a time series format
-(contains columns \code{time_index}, \code{location}, and \code{observation}) for a single
-location}
+(contains columns \code{time_index}, \code{location}, and \code{observation})}
 
 \item{reference_date}{string of the reference date for the forecasts, i.e.
 the date relative to which the targets are defined (usually Saturday for
