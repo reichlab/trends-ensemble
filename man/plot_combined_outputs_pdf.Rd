@@ -6,8 +6,8 @@
 \usage{
 plot_combined_outputs_pdf(
   model_out_tbl,
-  target_data,
-  location_data,
+  target_ts,
+  location_data = NULL,
   reference_date,
   intervals = c(0.5, 0.8, 0.95),
   cats_ordered = NULL,
@@ -20,15 +20,15 @@ plot_combined_outputs_pdf(
 outputs (e.g., predictions). Assumes "location" and "horizon" are among the
 task ID cols. Should only contain one model.}
 
-\item{target_data}{a \code{data.frame} of target data in a long format with columns
-\code{date}, \code{location}, \code{location_name}, and \code{observation} (other columns will be
-ignored)}
+\item{target_ts}{a \code{data.frame} of target data in a time series format
+(contains columns \code{time_index}, \code{location}, and \code{observation})}
 
 \item{location_data}{a \code{data.frame} containing information about the locations
 being forecast. Assumed to contain a "location" column that may be joined with
 that in the provided \code{model_out_tbl} and \code{target_ts}, plus a "location_name"
 column of full location names (instead of abbreviations or fips codes). Any
-other columns will be ignored.}
+other columns will be ignored. Defaults to NULL, in which case the values in
+the "location" column will be used as plot labels.}
 
 \item{reference_date}{string of the reference date for the forecasts.
 Must be in the ymd format, with yyyy-mm-dd format recommended.}

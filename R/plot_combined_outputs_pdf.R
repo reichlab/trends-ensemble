@@ -3,14 +3,14 @@
 #' @param model_out_tbl an object of class `model_out_tbl` with component model
 #'   outputs (e.g., predictions). Assumes "location" and "horizon" are among the
 #'   task ID cols. Should only contain one model.
-#' @param target_data a `data.frame` of target data in a long format with columns
-#'   `date`, `location`, `location_name`, and `observation` (other columns will be
-#'   ignored)
+#' @param target_ts a `data.frame` of target data in a time series format
+#'   (contains columns `time_index`, `location`, and `observation`)
 #' @param location_data a `data.frame` containing information about the locations
 #'   being forecast. Assumed to contain a "location" column that may be joined with
 #'   that in the provided `model_out_tbl` and `target_ts`, plus a "location_name"
 #'   column of full location names (instead of abbreviations or fips codes). Any
-#'   other columns will be ignored.
+#'   other columns will be ignored. Defaults to NULL, in which case the values in
+#'   the "location" column will be used as plot labels.
 #' @param reference_date string of the reference date for the forecasts.
 #'   Must be in the ymd format, with yyyy-mm-dd format recommended.
 #' @param intervals numeric vector of prediction interval levels to plot for the
@@ -27,8 +27,8 @@
 #' @return NULL
 #'
 #' @export
-plot_combined_outputs_pdf <- function(model_out_tbl, target_data,
-                                      location_data, reference_date,
+plot_combined_outputs_pdf <- function(model_out_tbl, target_ts,
+                                      location_data = NULL, reference_date,
                                       intervals = c(0.5, 0.8, 0.95), cats_ordered = NULL,
                                       quantile_title = NULL, pmf_title = NULL) {
 
@@ -39,6 +39,20 @@ plot_combined_outputs_pdf <- function(model_out_tbl, target_data,
   forecast_types <- unique(model_out_tbl$output_type)
   if (!all(c("quantile", "pmf") %in% forecast_types)) {
     cli::cli_abort("{.arg model_out_tbl} must contain both the quantile and pmf output type")
+  }
+
+  validate_target_ts(target_ts)
+
+  if (is.null(location_data)) {
+    location_col <- "location"
+  } else {
+    req_loc_col <- c("location", "location_name")
+    if (!all(req_loc_col %in% names(location_data))) {
+      cli::cli_abort("{.arg location_data} must contain the columns {.val {req_loc_col}}")
+    }
+    location_col <- "location_name"
+    model_out_tbl <- dplyr::left_join(model_out_tbl, location_data, by = "location")
+    target_ts <- dplyr::left_join(target_ts, location_data, by = "location")
   }
 
   if (length(reference_date) > 1) {
@@ -63,19 +77,18 @@ plot_combined_outputs_pdf <- function(model_out_tbl, target_data,
   data_start <- reference_date - 12 * 7
   data_end <- reference_date + 6 * 7
 
-  forecasts <- dplyr::left_join(model_out_tbl, location_data, by = "location")
-  purrr::map(unique(forecasts$location), .f = function(loc) {
-    p1 <- forecasts |>
+  purrr::map(unique(model_out_tbl$location), .f = function(loc) {
+    p1 <- model_out_tbl |>
       dplyr::filter(.data[["output_type"]] == "quantile", .data[["location"]] == loc) |>
       dplyr::mutate(output_type_id = as.numeric(.data[["output_type_id"]])) |>
       hubVis::plot_step_ahead_model_output(
-        target_data |>
-          dplyr::filter(date >= data_start, date <= data_end, .data[["location"]] == loc) |>
-          dplyr::mutate(observation = .data[["value"]]),
+        target_ts |>
+          dplyr::mutate(date = .data[["time_index"]]) |>
+          dplyr::filter(date >= data_start, date <= data_end, .data[["location"]] == loc),
         x_col_name = "target_end_date",
         x_target_col_name = "date",
         intervals = intervals,
-        facet = "location_name",
+        facet = location_col,
         facet_scales = "free_y",
         facet_nrow = 1,
         use_median_as_point = TRUE,
@@ -96,7 +109,7 @@ plot_combined_outputs_pdf <- function(model_out_tbl, target_data,
 
     if (is.null(cats_ordered)) cats_ordered <- cats_actual
 
-    p2 <- forecasts |>
+    p2 <- model_out_tbl |>
       dplyr::filter(.data[["output_type"]] == "pmf", .data[["location"]] == loc) |>
       dplyr::mutate(output_type_id = forcats::fct_relevel(.data[["output_type_id"]], cats_ordered)) |>
       ggplot2::ggplot(ggplot2::aes(fill = .data[["output_type_id"]], y = .data[["value"]], x = .data[["horizon"]])) +
