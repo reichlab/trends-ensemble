@@ -32,15 +32,22 @@ Imports:
     arrow,
     cli,
     dplyr,
+    forcats,
+    ggplot2,
+    gridExtra,
+    grDevices,
     hubEnsembles,
     hubUtils,
+    hubVis,
     purrr,
     rlang,
+    scales,
     simplets,
     tibble,
     tidyr
 Remotes: 
     hubverse-org/hubEnsembles,
+    hubverse-org/hubVis,
     reichlab/simplets
 Suggests: 
     car,
