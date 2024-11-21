@@ -4,13 +4,15 @@ daily_variations <- tidyr::expand_grid(
   symmetrize = TRUE,
   window_size = c(14 - 1, 7 - 1),
   temporal_resolution = "daily"
-)
+) |>
+  dplyr::mutate(n_samples = ifelse(.data[["window_size"]] == 6, 12, 13), .before = 4)
 weekly_variations <- tidyr::expand_grid(
   transformation = "none",
   symmetrize = TRUE,
   window_size = c(2, 1),
   temporal_resolution = "weekly"
-)
+) |>
+  dplyr::mutate(n_samples = ifelse(.data[["window_size"]] == 1, 12, 13), .before = 4)
 
 daily_ts <- expand.grid(
   stringsAsFactors = FALSE,
@@ -34,7 +36,6 @@ test_that("missing or extraneous columns in component_variations throws an error
                            target = "inc hosp",
                            n_sim = 10000,
                            quantile_levels = c(.1, .5, .9),
-                           n_samples = NULL,
                            return_baseline_predictions = FALSE) |>
     expect_error(regex = "`component_variations` is missing the column",
                  fixed = TRUE)
@@ -47,7 +48,6 @@ test_that("missing or extraneous columns in component_variations throws an error
                            target = "inc hosp",
                            n_sim = 10000,
                            quantile_levels = c(.1, .5, .9),
-                           n_samples = NULL,
                            return_baseline_predictions = FALSE) |>
     expect_error(regex = "`component_variations` contains the extra column",
                  fixed = TRUE)
@@ -63,7 +63,6 @@ test_that("unsupported temporal_resolution values in component_variations throws
                            target = "inc hosp",
                            n_sim = 10000,
                            quantile_levels = c(.1, .5, .9),
-                           n_samples = NULL,
                            return_baseline_predictions = FALSE) |>
     expect_error(regex = "`component_variations` must only include temporal resolution values",
                  fixed = TRUE)
@@ -78,7 +77,6 @@ test_that("multiple temporal_resolution values in component_variations throws an
                            target = "inc hosp",
                            n_sim = 10000,
                            quantile_levels = c(.1, .5, .9),
-                           n_samples = NULL,
                            return_baseline_predictions = FALSE) |>
     expect_error(regex = "Currently `component_variations` may only contain one unique temporal resolution value",
                  fixed = TRUE)
@@ -92,27 +90,29 @@ test_that("providing target_ts that cannot be aggregated to match all requested 
                            target = "inc hosp",
                            n_sim = 10000,
                            quantile_levels = c(.1, .5, .9),
-                           n_samples = NULL,
                            return_baseline_predictions = FALSE) |>
     expect_error(regex = "Cannot match temporal resolution of provided `target_ts`",
                  fixed = TRUE)
 })
 
 test_that("output predictions is a model_out_tbl", {
-  daily_variations |>
-    create_trends_ensemble(daily_ts,
-                           reference_date = "2022-12-10",
-                           horizons = -6:21,
-                           target = "inc hosp",
-                           quantile_levels = c(.1, .5, .9),
-                           n_samples = NULL,
-                           return_baseline_predictions = FALSE) |>
-    expect_s3_class("model_out_tbl")
+  expect_warning(
+    daily_variations |>
+      create_trends_ensemble(daily_ts,
+                             reference_date = "2022-12-10",
+                             horizons = -6:21,
+                             target = "inc hosp",
+                             quantile_levels = c(.1, .5, .9),
+                             return_baseline_predictions = FALSE) |>
+      expect_s3_class("model_out_tbl"),
+    regexp = "`model_out_tbl` contains the same number of samples from each component model",
+    fixed = TRUE
+  )
 })
 
 test_that("component outputs are correctly calculated", {
   daily_expected <- fit_baseline_models(
-    daily_variations[, 1:3],
+    daily_variations[, 1:4],
     daily_ts,
     reference_date = "2022-12-10",
     temporal_resolution = "daily",
@@ -120,11 +120,10 @@ test_that("component outputs are correctly calculated", {
     target = "inc hosp",
     n_sim = 10000,
     quantile_levels = c(.1, .5, .9),
-    n_samples = 100,
     seed = 1234
   )
   weekly_expected <- fit_baseline_models(
-    weekly_variations[, 1:3],
+    weekly_variations[, 1:4],
     aggregate_daily_to_weekly(daily_ts),
     reference_date = "2022-12-10",
     temporal_resolution = "weekly",
@@ -132,56 +131,67 @@ test_that("component outputs are correctly calculated", {
     target = "inc hosp",
     n_sim = 10000,
     quantile_levels = c(.1, .5, .9),
-    n_samples = 100,
     seed = 1234
   )
 
-  daily_actual <- daily_variations |>
-    create_trends_ensemble(daily_ts,
-                           reference_date = "2022-12-10",
-                           horizons = -6:21,
-                           target = "inc hosp",
-                           n_sim = 10000,
-                           quantile_levels = c(.1, .5, .9),
-                           n_samples = 100,
-                           seed = 1234,
-                           return_baseline_predictions = TRUE) |>
-    purrr::pluck("baselines")
-  weekly_actual <- weekly_variations |>
-    create_trends_ensemble(aggregate_daily_to_weekly(daily_ts),
-                           reference_date = "2022-12-10",
-                           horizons = 0:3,
-                           target = "inc hosp",
-                           n_sim = 10000,
-                           quantile_levels = c(.1, .5, .9),
-                           n_samples = 100,
-                           seed = 1234,
-                           return_baseline_predictions = TRUE) |>
-    purrr::pluck("baselines")
+  expect_warning(
+    daily_actual <- daily_variations |>
+      create_trends_ensemble(daily_ts,
+                             reference_date = "2022-12-10",
+                             horizons = -6:21,
+                             target = "inc hosp",
+                             n_sim = 10000,
+                             quantile_levels = c(.1, .5, .9),
+                             seed = 1234,
+                             return_baseline_predictions = TRUE) |>
+      purrr::pluck("baselines"),
+    regexp = "`model_out_tbl` contains the same number of samples from each component model",
+    fixed = TRUE
+  )
+  expect_warning(
+    weekly_actual <- weekly_variations |>
+      create_trends_ensemble(aggregate_daily_to_weekly(daily_ts),
+                             reference_date = "2022-12-10",
+                             horizons = 0:3,
+                             target = "inc hosp",
+                             n_sim = 10000,
+                             quantile_levels = c(.1, .5, .9),
+                             seed = 1234,
+                             return_baseline_predictions = TRUE) |>
+      purrr::pluck("baselines"),
+    regexp = "`model_out_tbl` contains the same number of samples from each component model",
+    fixed = TRUE
+  )
 
   expect_equal(daily_actual, daily_expected, tolerance = 1e-3)
   expect_equal(weekly_actual, weekly_expected, tolerance = 1e-3)
 })
 
 test_that("ensemble is correctly calculated", {
-  daily_outputs <- daily_variations |>
-    create_trends_ensemble(daily_ts,
-                           reference_date = "2022-12-10",
-                           horizons = -6:21,
-                           target = "inc hosp",
-                           n_sim = 10000,
-                           quantile_levels = c(.1, .5, .9),
-                           n_samples = 1000,
-                           return_baseline_predictions = TRUE)
-  weekly_outputs <- weekly_variations |>
-    create_trends_ensemble(daily_ts,
-                           reference_date = "2022-12-10",
-                           horizons = 0:3,
-                           target = "inc hosp",
-                           n_sim = 10000,
-                           quantile_levels = c(.1, .5, .9),
-                           n_samples = 1000,
-                           return_baseline_predictions = TRUE)
+  expect_warning(
+    daily_outputs <- daily_variations |>
+      create_trends_ensemble(daily_ts,
+                             reference_date = "2022-12-10",
+                             horizons = -6:21,
+                             target = "inc hosp",
+                             n_sim = 10000,
+                             quantile_levels = c(.1, .5, .9),
+                             return_baseline_predictions = TRUE),
+    regexp = "`model_out_tbl` contains the same number of samples from each component model",
+    fixed = TRUE
+  )
+  expect_warning(
+    weekly_outputs <- weekly_variations |>
+      create_trends_ensemble(daily_ts,
+                             reference_date = "2022-12-10",
+                             horizons = 0:3,
+                             target = "inc hosp",
+                             n_sim = 10000,
+                             quantile_levels = c(.1, .5, .9),
+                             return_baseline_predictions = TRUE),
+    regexp = "`model_out_tbl` contains the same number of samples from each component model",
+    fixed = TRUE
+  )
 
   daily_quantile <- daily_outputs[["baselines"]] |>
     dplyr::filter(output_type == "quantile") |>

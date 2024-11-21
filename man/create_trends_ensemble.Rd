@@ -13,7 +13,6 @@ create_trends_ensemble(
   target,
   n_sim = 10000,
   quantile_levels,
-  n_samples = NULL,
   round_predictions = FALSE,
   seed = NULL,
   return_baseline_predictions = FALSE
@@ -22,8 +21,8 @@ create_trends_ensemble(
 \arguments{
 \item{component_variations}{a \code{data.frame} where each row specifies a set of
 hyperparameters to use for a single baseline model fit, with columns
-\code{transformation}, \code{symmetrize}, \code{window_size}, and \code{temporal_resolution}.
-See details for more information}
+\code{transformation}, \code{symmetrize}, \code{window_size}, \code{temporal_resolution}, and
+\code{n_samples}. See details for more information}
 
 \item{target_ts}{a \code{data.frame} of target data in a time series format
 (contains columns \code{time_index}, \code{location}, and \code{observation}) for a single
@@ -43,10 +42,6 @@ same temporal resolution as the provided \code{target_ts}.}
 
 \item{quantile_levels}{numeric vector of quantile levels to output; set to NULL
 if quantile outputs not requested. Defaults to NULL.}
-
-\item{n_samples}{integer of amount of samples to output (and predict);
-set to NULL if sample outputs not requested (in this case 100000 samples
-are generated from which to extract quantiles). Defaults to NULL.}
 
 \item{round_predictions}{boolean specifying whether to round the output
 predictions to the nearest whole number. Defaults to FALSE}
@@ -77,6 +72,9 @@ possible values for each:
 \item window_size (integer), determines how many previous observations inform
 the forecast
 \item temporal_resolution (character): "daily" or "weekly"
+\item n_samples (integer or NULL), determines how many sample forecasts to generate
+for each model (per unique task ID combo); must either be all integer values
+or all NULL
 }
 
 Note that it must be possible to aggregate the \code{target_ts} data to the

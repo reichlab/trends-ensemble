@@ -2,7 +2,8 @@
 model_variations <- data.frame(stringsAsFactors = FALSE,
                                transformation = c("none", "none"),
                                symmetrize = c(TRUE, TRUE),
-                               window_size = c(3, 4))
+                               window_size = c(3, 4)) |>
+  dplyr::mutate(n_samples = ifelse(.data[["window_size"]] == 4, 12, 13))
 target_ts <- expand.grid(stringsAsFactors = FALSE,
                          location = c("ak", "al"),
                          time_index = as.Date("2022-11-05") + seq(0, 63, 7),
@@ -18,8 +19,7 @@ test_that("missing target throws an error", {
                       horizons = 0:3,
                       target = NULL,
                       n_sim = 10000,
-                      quantile_levels = c(.1, .5, .9),
-                      n_samples = NULL) |>
+                      quantile_levels = c(.1, .5, .9)) |>
     expect_error(
       regexp = "`target` is missing; please provide one", fixed = TRUE
     )
@@ -33,8 +33,7 @@ test_that("output predictions is a model_out_tbl", {
                                           horizons = 0:3,
                                           target = "inc hosp",
                                           n_sim = 10000,
-                                          quantile_levels = c(.1, .5, .9),
-                                          n_samples = NULL)
+                                          quantile_levels = c(.1, .5, .9))
   expect_s3_class(baseline_outputs, "model_out_tbl")
 })
 
@@ -47,8 +46,7 @@ test_that("model IDs are as expected", {
                                           horizons = 0:3,
                                           target = "inc hosp",
                                           n_sim = 10000,
-                                          quantile_levels = c(.1, .5, .9),
-                                          n_samples = NULL) |>
+                                          quantile_levels = c(.1, .5, .9)) |>
     dplyr::pull(.data[["model_id"]]) |>
     unique()
   expect_equal(actual_model_ids, expected_model_ids)
@@ -65,7 +63,6 @@ test_that("mapping over locations works as expected", {
         horizons = 0:3,
         n_sim = 10000,
         quantile_levels = c(.1, .5, .9),
-        n_samples = NULL,
         seed = 1234
       ),
       fit_baselines_one_location(
@@ -76,7 +73,6 @@ test_that("mapping over locations works as expected", {
         horizons = 0:3,
         n_sim = 10000,
         quantile_levels = c(.1, .5, .9),
-        n_samples = NULL,
         seed = 1234
       )
     ) |>
@@ -106,7 +102,6 @@ test_that("mapping over locations works as expected", {
                                         n_sim = 10000,
                                         target = "inc hosp",
                                         quantile_levels = c(.1, .5, .9),
-                                        n_samples = NULL,
                                         seed = 1234)
   expect_equal(actual_outputs, expected_outputs, tolerance = 1e-3)
 })

@@ -1,10 +1,11 @@
+
 #' Generate predictions for the trends ensemble, a quantile median of component
 #' baseline models
 #'
 #' @param component_variations a `data.frame` where each row specifies a set of
 #'   hyperparameters to use for a single baseline model fit, with columns
-#'   `transformation`, `symmetrize`, `window_size`, and `temporal_resolution`.
-#'   See details for more information
+#'   `transformation`, `symmetrize`, `window_size`, `temporal_resolution`, and
+#'   `n_samples`. See details for more information
 #' @param target_ts a `data.frame` of target data in a time series format
 #'   (contains columns `time_index`, `location`, and `observation`) for a single
 #'   location
@@ -18,9 +19,6 @@
 #' @param n_sim integer number of simulations to predict. Defaults to 100000.
 #' @param quantile_levels numeric vector of quantile levels to output; set to NULL
 #'   if quantile outputs not requested. Defaults to NULL.
-#' @param n_samples integer of amount of samples to output (and predict);
-#'   set to NULL if sample outputs not requested (in this case 100000 samples
-#'   are generated from which to extract quantiles). Defaults to NULL.
 #' @param round_predictions boolean specifying whether to round the output
 #'   predictions to the nearest whole number. Defaults to FALSE
 #' @param seed integer specifying a seed to set for reproducible results.
@@ -37,6 +35,9 @@
 #'   - window_size (integer), determines how many previous observations inform
 #'     the forecast
 #'   - temporal_resolution (character): "daily" or "weekly"
+#'   - n_samples (integer or NULL), determines how many sample forecasts to generate
+#'     for each model (per unique task ID combo); must either be all integer values
+#'     or all NULL
 #'
 #' Note that it must be possible to aggregate the `target_ts` data to the
 #' temporal resolution values given in `component_variations`. For example, if
@@ -57,11 +58,10 @@ create_trends_ensemble <- function(component_variations,
                                    target,
                                    n_sim = 10000,
                                    quantile_levels,
-                                   n_samples = NULL,
                                    round_predictions = FALSE,
                                    seed = NULL,
                                    return_baseline_predictions = FALSE) {
-  cv_col <- c("transformation", "symmetrize", "window_size", "temporal_resolution")
+  cv_col <- c("transformation", "symmetrize", "window_size", "temporal_resolution", "n_samples")
   validate_colnames(component_variations, cv_col, "component_variations")
 
   valid_temp_res <- c("daily", "weekly")
@@ -108,7 +108,6 @@ create_trends_ensemble <- function(component_variations,
                               target,
                               n_sim = n_sim,
                               quantile_levels,
-                              n_samples,
                               round_predictions,
                               seed)
       } else {
@@ -121,7 +120,6 @@ create_trends_ensemble <- function(component_variations,
                               target,
                               n_sim = n_sim,
                               quantile_levels,
-                              n_samples,
                               round_predictions,
                               seed)
       }

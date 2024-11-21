@@ -13,7 +13,6 @@ fit_baseline_models(
   target,
   n_sim = 10000,
   quantile_levels,
-  n_samples,
   round_predictions = FALSE,
   seed = NULL
 )
@@ -21,8 +20,7 @@ fit_baseline_models(
 \arguments{
 \item{model_variations}{a \code{data.frame} where each row specifies a set of
 hyperparameters to use for a single baseline model fit, with columns
-\code{transformation}, \code{symmetrize}, and \code{window_size}. See details for more
-information}
+\code{transformation}, \code{symmetrize}, \code{window_size}, and \code{n_samples}.}
 
 \item{target_ts}{a \code{data.frame} of target data in a time series format
 (contains columns \code{time_index}, \code{location}, and \code{observation}) for a single
@@ -44,10 +42,6 @@ the reference_date, e.g. 0:3 or 1:4}
 
 \item{quantile_levels}{numeric vector of quantile levels to output; set to NULL
 if quantile outputs not requested. Defaults to NULL.}
-
-\item{n_samples}{integer of amount of samples to output;
-set to NULL if sample outputs not requested (in this case 100000 samples
-are generated from which to extract quantiles). Defaults to NULL.}
 
 \item{round_predictions}{boolean specifying whether to round the output
 predictions to the nearest whole number. Defaults to FALSE}
@@ -71,5 +65,8 @@ possible values for each:
 \item symmetrize (boolean), determines if distribution is symmetric
 \item window_size (integer), determines how many previous observations inform
 the forecast
+\item n_samples (integer or NULL), determines how many sample forecasts to generate
+for each model (per unique task ID combo); must either be all integer values
+or all NULL
 }
 }

@@ -9,6 +9,9 @@
 #'   - symmetrize (boolean), determines if distribution is symmetric
 #'   - window_size (integer), determines how many previous observations inform
 #'     the forecast
+#'   - n_samples (integer or NULL), determines how many sample forecasts to generate
+#'     for each model (per unique task ID combo); must either be all integer values
+#'     or all NULL
 #'
 #' @return `model_out_tbl` of forecasts for all baseline models with columns:
 #'   `model_id`, `reference_date`, `location`, `horizon`, `target`,
@@ -25,7 +28,6 @@ fit_baseline_models <- function(model_variations,
                                 target,
                                 n_sim = 10000,
                                 quantile_levels,
-                                n_samples,
                                 round_predictions = FALSE,
                                 seed = NULL) {
   if (is.null(target)) {
@@ -44,7 +46,6 @@ fit_baseline_models <- function(model_variations,
         horizons = horizons,
         n_sim = n_sim,
         quantile_levels = quantile_levels,
-        n_samples = n_samples,
         round_predictions = round_predictions,
         seed = seed
       )

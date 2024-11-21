@@ -2,7 +2,8 @@
 model_variations <- data.frame(stringsAsFactors = FALSE,
                                transformation = c("none", "none"),
                                symmetrize = c(TRUE, TRUE),
-                               window_size = c(3, 4))
+                               window_size = c(3, 4)) |>
+  dplyr::mutate(n_samples = ifelse(.data[["window_size"]] == 4, 12, 13))
 target_ts <- data.frame(stringsAsFactors = FALSE,
                         location = rep("ak", 10),
                         time_index = as.Date("2022-11-05") + seq(0, 63, 7),
@@ -18,8 +19,7 @@ test_that("multiple locations in target data throws an error", {
                              temporal_resolution = "weekly",
                              horizons = 0:3,
                              n_sim = 10000,
-                             quantile_levels = c(.1, .5, .9),
-                             n_samples = NULL) |>
+                             quantile_levels = c(.1, .5, .9)) |>
     expect_error(
       regexp = " but only one may be provided.", fixed = TRUE
     )
@@ -32,8 +32,7 @@ test_that("null reference date throws an error", {
                              temporal_resolution = "weekly",
                              horizons = 0:3,
                              n_sim = 10000,
-                             quantile_levels = c(.1, .5, .9),
-                             n_samples = NULL) |>
+                             quantile_levels = c(.1, .5, .9)) |>
     expect_error(
       regexp = "`reference_date` is missing", fixed = TRUE
     )
@@ -46,8 +45,7 @@ test_that("invalid reference date format throws an error", {
                              temporal_resolution = "weekly",
                              horizons = 0:3,
                              n_sim = 10000,
-                             quantile_levels = c(.1, .5, .9),
-                             n_samples = NULL) |>
+                             quantile_levels = c(.1, .5, .9)) |>
     expect_error(
       regexp = "`reference_date` could not be correctly parsed.", fixed = TRUE
     )
@@ -60,8 +58,7 @@ test_that("multiple reference dates throws an error", {
                              temporal_resolution = "weekly",
                              horizons = 0:3,
                              n_sim = 10000,
-                             quantile_levels = c(.1, .5, .9),
-                             n_samples = NULL) |>
+                             quantile_levels = c(.1, .5, .9)) |>
     expect_error(
       regexp = "only one `reference_date` may be provided", fixed = TRUE
     )
@@ -74,8 +71,7 @@ test_that("invalid temporal resolution throws an error", {
                              temporal_resolution = "monthly",
                              horizons = 0:3,
                              n_sim = 10000,
-                             quantile_levels = c(.1, .5, .9),
-                             n_samples = NULL) |>
+                             quantile_levels = c(.1, .5, .9)) |>
     expect_error(
       regexp = "`temporal_resolution` must be only one of ", fixed = TRUE
     )
@@ -88,8 +84,7 @@ test_that("provided temporal_resolution not matching that of target_ts throws an
                              temporal_resolution = "daily",
                              horizons = 0:3,
                              n_sim = 10000,
-                             quantile_levels = c(.1, .5, .9),
-                             n_samples = NULL) |>
+                             quantile_levels = c(.1, .5, .9)) |>
     expect_error(
       regexp = "The provided `temporal_resolution` does not match that of the provided `target_ts`",
       fixed = TRUE
@@ -108,7 +103,6 @@ test_that(
         horizons = 0:4,
         n_sim = 10000,
         quantile_levels = c(.1, .5, .9),
-        n_samples = NULL,
         seed = 1234
       ) |>
       dplyr::mutate(
@@ -124,7 +118,6 @@ test_that(
         horizons = 0:3,
         n_sim = 10000,
         quantile_levels = c(.1, .5, .9),
-        n_samples = NULL,
         seed = 1234
       )
     expect_equal(actual_outputs, expected_outputs, tolerance = 1e-3)
@@ -132,48 +125,43 @@ test_that(
 )
 
 test_that("overlapping forecasts are replaced with observed values and throws a warning", {
-  expected_outputs <-
+  quantile_expected <-
     rbind(
       expand.grid(
         stringsAsFactors = FALSE,
         transformation = "none", symmetrize = TRUE, window_size = c(3, 4),
-        location = "ak", reference_date = as.Date("2023-01-07"),
-        horizon = 0, target_end_date = as.Date("2023-01-07"),
+        location = "ak", reference_date = as.Date("2022-12-31"),
+        horizon = 1, target_end_date = as.Date("2023-01-07"),
         output_type = "quantile", output_type_id = c(0.1, 0.5, 0.9), value = 32
       ),
       fit_baselines_one_location(
-        model_variations,
+        model_variations |> dplyr::mutate(n_samples = NULL),
         target_ts,
-        reference_date = "2023-01-14",
+        reference_date = "2022-12-31",
         temporal_resolution = "weekly",
-        horizons = 0:2,
+        horizons = 2:4,
         n_sim = 10000,
         quantile_levels = c(.1, .5, .9),
-        n_samples = NULL,
         seed = 1234
-      ) |>
-        dplyr::mutate(
-          reference_date = reference_date - 7,
-          horizon = horizon + 1
-        )
+      )
     ) |>
     dplyr::arrange(transformation, symmetrize, window_size) |>
     dplyr::tibble()
-  attr(expected_outputs, "out.attrs") <- NULL
+  attr(quantile_expected, "out.attrs") <- NULL
   expect_warning(
-    actual_outputs <- model_variations |>
+    quantile_actual <- model_variations |>
+      dplyr::mutate(n_samples = NULL) |>
       fit_baselines_one_location(
         target_ts,
-        reference_date = "2023-01-07",
+        reference_date = "2022-12-31",
         temporal_resolution = "weekly",
-        horizons = 0:3,
+        horizons = 1:4,
         n_sim = 10000,
         quantile_levels = c(.1, .5, .9),
-        n_samples = NULL,
         seed = 1234
       ),
     regexp = "forecasts requested for a time index within the provided `target_ts`, replacing overlapping forecasts",
     fixed = TRUE
   )
-  expect_equal(actual_outputs, expected_outputs, tolerance = 1e-3)
+  expect_equal(quantile_actual, quantile_expected, tolerance = 1e-3)
 })
