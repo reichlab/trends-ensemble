@@ -47,14 +47,14 @@ get_baseline_predictions <- function(target_ts,
 
   num_locs <- length(unique(target_ts[["location"]]))
   if (num_locs != 1) {
-    cli::cli_abort("{.arg target_ts} contains {.val num_locs} but only one may be provided.")
+    cli::cli_abort("{.arg target_ts} contains {.val {num_locs}} but only one may be provided.")
   }
 
   validate_variation_inputs(transformation, symmetrize, window_size)
 
   valid_origins <- c("median", "obs")
   if (!origin %in% valid_origins) {
-    cli::cli_abort("{.arg origin} must be only one of {.val valid_origins}")
+    cli::cli_abort("{.arg origin} must be only one of {.val {valid_origins}}")
   }
 
   validate_integer(n_sim, "n_sim")
