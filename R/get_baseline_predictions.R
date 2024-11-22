@@ -44,6 +44,7 @@ get_baseline_predictions <- function(target_ts,
                                      seed = NULL) {
   # validate arguments
   validate_target_ts(target_ts)
+  target_ts <- dplyr::arrange(target_ts, .data[["time_index"]])
 
   num_locs <- length(unique(target_ts[["location"]]))
   if (num_locs != 1) {
