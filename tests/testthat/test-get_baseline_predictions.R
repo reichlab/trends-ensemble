@@ -358,3 +358,54 @@ test_that("quantile forecasts are correctly calculated", {
 
   expect_equal(quantile_actual, quantile_expected, tolerance = 1.5e-1)
 })
+
+
+test_that("forecasts are correctly calculated regardless of target data ordering", {
+  both_expected <- target_ts |>
+    get_baseline_predictions(transformation = "none",
+                             symmetrize = TRUE,
+                             window_size = 3,
+                             effective_horizons = 1:4,
+                             origin = "obs",
+                             n_sim = 10000,
+                             quantile_levels = c(0.1, 0.5, 0.9),
+                             n_samples = 10000,
+                             round_predictions = TRUE,
+                             seed = 1234) |>
+    tidyr::unnest(cols = c("forecasts"))
+
+  both_actual <- target_ts |>
+    dplyr::arrange(.data[["observation"]]) |>
+    get_baseline_predictions(transformation = "none",
+                             symmetrize = TRUE,
+                             window_size = 3,
+                             effective_horizons = 1:4,
+                             origin = "obs",
+                             n_sim = 10000,
+                             quantile_levels = c(0.1, 0.5, 0.9),
+                             n_samples = 10000,
+                             round_predictions = TRUE,
+                             seed = 1234) |>
+    tidyr::unnest(cols = c("forecasts"))
+
+  expect_equal(both_actual, both_expected)
+})
+
+test_that("quantile forecasts do not include negative values for small target data values", {
+  target_ts |>
+    dplyr::mutate(observation = round(.data[["observation"]] / 7)) |>
+    get_baseline_predictions(transformation = "none",
+                             symmetrize = TRUE,
+                             window_size = 3,
+                             effective_horizons = 1:4,
+                             origin = "obs",
+                             n_sim = 10000,
+                             quantile_levels = c(0.1, 0.5, 0.9),
+                             n_samples = 10000,
+                             round_predictions = TRUE,
+                             seed = 1234) |>
+    tidyr::unnest(cols = c("forecasts")) |>
+    dplyr::pull(.data[["value"]]) |>
+    min() |>
+    expect_gte(0)
+})
