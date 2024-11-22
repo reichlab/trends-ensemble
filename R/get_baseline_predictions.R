@@ -157,7 +157,8 @@ extract_predictions <- function(predictions,
             output_type = "quantile",
             output_type_id = quantile_levels,
             value = stats::quantile(predictions[, h], probs = quantile_levels)
-          )
+          ) |>
+            dplyr::mutate(value = ifelse(.data[["value"]] < 0, 0, .data[["value"]]))
         }
       ) |>
       purrr::list_rbind()
