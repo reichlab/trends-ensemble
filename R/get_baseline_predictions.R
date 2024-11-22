@@ -139,6 +139,7 @@ extract_predictions <- function(predictions,
             dplyr::mutate(
               output_type = "sample",
               output_type_id = as.numeric(dplyr::row_number()),
+              value = ifelse(.data[["value"]] < 0, 0, .data[["value"]]),
               .before = 2
             ) |>
             dplyr::select("horizon", "output_type", "output_type_id", "value")

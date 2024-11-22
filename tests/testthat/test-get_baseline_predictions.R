@@ -97,7 +97,7 @@ test_that("not requesting any forecasts throws an error", {
 
 test_that("only non-negative forecast values are returned", {
   sample_predictions <- target_ts |>
-    get_baseline_predictions(transformation = "none",
+    get_baseline_predictions(transformation = "sqrt",
                              symmetrize = TRUE,
                              window_size = 3,
                              effective_horizons = 1:4,
@@ -391,10 +391,12 @@ test_that("forecasts are correctly calculated regardless of target data ordering
   expect_equal(both_actual, both_expected)
 })
 
-test_that("quantile forecasts do not include negative values for small target data values", {
-  target_ts |>
-    dplyr::mutate(observation = round(.data[["observation"]] / 7)) |>
-    get_baseline_predictions(transformation = "none",
+test_that("Forecasts do not include negative values for small target data values", {
+  data.frame(stringsAsFactors = FALSE,
+             location = rep("WA", 10),
+             time_index = as.Date("2024-09-14") + seq(0, 63, 7),
+             observation = c(5, 6, 6, 10, 7, 1, 4, 2, 13, 22)) |>
+    get_baseline_predictions(transformation = "sqrt",
                              symmetrize = TRUE,
                              window_size = 3,
                              effective_horizons = 1:4,
