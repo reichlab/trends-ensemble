@@ -44,17 +44,18 @@ get_baseline_predictions <- function(target_ts,
                                      seed = NULL) {
   # validate arguments
   validate_target_ts(target_ts)
+  target_ts <- dplyr::arrange(target_ts, .data[["time_index"]])
 
   num_locs <- length(unique(target_ts[["location"]]))
   if (num_locs != 1) {
-    cli::cli_abort("{.arg target_ts} contains {.val num_locs} but only one may be provided.")
+    cli::cli_abort("{.arg target_ts} contains {.val {num_locs}} but only one may be provided.")
   }
 
   validate_variation_inputs(transformation, symmetrize, window_size)
 
   valid_origins <- c("median", "obs")
   if (!origin %in% valid_origins) {
-    cli::cli_abort("{.arg origin} must be only one of {.val valid_origins}")
+    cli::cli_abort("{.arg origin} must be only one of {.val {valid_origins}}")
   }
 
   validate_integer(n_sim, "n_sim")
@@ -138,6 +139,7 @@ extract_predictions <- function(predictions,
             dplyr::mutate(
               output_type = "sample",
               output_type_id = as.numeric(dplyr::row_number()),
+              value = ifelse(.data[["value"]] < 0, 0, .data[["value"]]),
               .before = 2
             ) |>
             dplyr::select("horizon", "output_type", "output_type_id", "value")
@@ -156,7 +158,8 @@ extract_predictions <- function(predictions,
             output_type = "quantile",
             output_type_id = quantile_levels,
             value = stats::quantile(predictions[, h], probs = quantile_levels)
-          )
+          ) |>
+            dplyr::mutate(value = ifelse(.data[["value"]] < 0, 0, .data[["value"]]))
         }
       ) |>
       purrr::list_rbind()

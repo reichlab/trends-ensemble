@@ -97,7 +97,7 @@ test_that("not requesting any forecasts throws an error", {
 
 test_that("only non-negative forecast values are returned", {
   sample_predictions <- target_ts |>
-    get_baseline_predictions(transformation = "none",
+    get_baseline_predictions(transformation = "sqrt",
                              symmetrize = TRUE,
                              window_size = 3,
                              effective_horizons = 1:4,
@@ -357,4 +357,57 @@ test_that("quantile forecasts are correctly calculated", {
     tidyr::unnest(cols = c("forecasts"))
 
   expect_equal(quantile_actual, quantile_expected, tolerance = 1.5e-1)
+})
+
+
+test_that("forecasts are correctly calculated regardless of target data ordering", {
+  both_expected <- target_ts |>
+    get_baseline_predictions(transformation = "none",
+                             symmetrize = TRUE,
+                             window_size = 3,
+                             effective_horizons = 1:4,
+                             origin = "obs",
+                             n_sim = 10000,
+                             quantile_levels = c(0.1, 0.5, 0.9),
+                             n_samples = 10000,
+                             round_predictions = TRUE,
+                             seed = 1234) |>
+    tidyr::unnest(cols = c("forecasts"))
+
+  both_actual <- target_ts |>
+    dplyr::arrange(.data[["observation"]]) |>
+    get_baseline_predictions(transformation = "none",
+                             symmetrize = TRUE,
+                             window_size = 3,
+                             effective_horizons = 1:4,
+                             origin = "obs",
+                             n_sim = 10000,
+                             quantile_levels = c(0.1, 0.5, 0.9),
+                             n_samples = 10000,
+                             round_predictions = TRUE,
+                             seed = 1234) |>
+    tidyr::unnest(cols = c("forecasts"))
+
+  expect_equal(both_actual, both_expected)
+})
+
+test_that("Forecasts do not include negative values for small target data values", {
+  data.frame(stringsAsFactors = FALSE,
+             location = rep("WA", 10),
+             time_index = as.Date("2024-09-14") + seq(0, 63, 7),
+             observation = c(5, 6, 6, 10, 7, 1, 4, 2, 13, 22)) |>
+    get_baseline_predictions(transformation = "sqrt",
+                             symmetrize = TRUE,
+                             window_size = 3,
+                             effective_horizons = 1:4,
+                             origin = "obs",
+                             n_sim = 10000,
+                             quantile_levels = c(0.1, 0.5, 0.9),
+                             n_samples = 10000,
+                             round_predictions = TRUE,
+                             seed = 1234) |>
+    tidyr::unnest(cols = c("forecasts")) |>
+    dplyr::pull(.data[["value"]]) |>
+    min() |>
+    expect_gte(0)
 })
