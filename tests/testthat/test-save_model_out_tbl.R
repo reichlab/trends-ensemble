@@ -61,3 +61,31 @@ test_that("Capitalized valid extension does not throw an error", {
     save_model_out_tbl(round_id_col = "reference_date", path = tempdir(), extension = "PARQUET") |>
     expect_no_error()
 })
+
+test_that("File names are as expected", {
+  temp_dir <- withr::local_tempdir()
+  save_model_out_tbl(model_outputs, round_id_col = "reference_date", path = temp_dir, extension = "csv")
+
+  expected_paths <- fs::path(rep("x", 4))
+  for (i in 1:4) {
+    expected_paths[i] <- fs::path(paste0(temp_dir, "/", letters[i], "/2021-12-18-", letters[i], ".csv"))
+  }
+  actual_paths <- fs::dir_ls(temp_dir, recurse = TRUE, type = "file")
+  expect_equal(unname(actual_paths), expected_paths)
+})
+
+test_that("Model outputs can be reconstructed", {
+  temp_dir <- withr::local_tempdir()
+  save_model_out_tbl(model_outputs, round_id_col = "reference_date", path = temp_dir, extension = "parquet")
+
+  reconstituted_outputs <- letters[1:4] |>
+    purrr::map(.f = function(model_id) {
+      fs::path(paste0(temp_dir, "/", model_id, "/2021-12-18-", model_id, ".parquet")) |>
+        arrow::read_parquet() |>
+        dplyr::mutate(model_id = model_id, reference_date = as.Date("2021-12-18"))
+    }) |>
+    purrr::list_rbind() |>
+    dplyr::arrange(output_type_id, location, model_id) |>
+    hubUtils::as_model_out_tbl()
+  expect_equal(reconstituted_outputs, hubUtils::as_model_out_tbl(model_outputs))
+})
