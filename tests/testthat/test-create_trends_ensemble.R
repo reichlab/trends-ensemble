@@ -172,6 +172,7 @@ test_that("ensemble is correctly calculated", {
                            n_sim = 10000,
                            quantile_levels = c(.1, .5, .9),
                            n_samples = 1000,
+                           seed = 1234,
                            return_baseline_predictions = TRUE)
   weekly_outputs <- weekly_variations |>
     create_trends_ensemble(daily_ts,
@@ -181,6 +182,7 @@ test_that("ensemble is correctly calculated", {
                            n_sim = 10000,
                            quantile_levels = c(.1, .5, .9),
                            n_samples = 1000,
+                           seed = 1234,
                            return_baseline_predictions = TRUE)
 
   daily_quantile <- daily_outputs[["baselines"]] |>
@@ -193,16 +195,25 @@ test_that("ensemble is correctly calculated", {
       reference_date = as.Date(reference_date),
       target_end_date = as.Date(target_end_date)
     )
+  set.seed(1234)
   daily_sample <- daily_outputs[["baselines"]] |>
     dplyr::filter(output_type == "sample") |>
-    dplyr::mutate(
-      output_type_id = as.integer(factor(paste0(model_id, output_type_id))),
+    hubEnsembles::linear_pool(
       model_id = "UMass-trends_ensemble",
+      compound_taskid_set = c("location", "reference_date", "target"),
+      derived_tasks = "target_end_date",
+      n_output_samples = 1000
+    ) |>
+    dplyr::mutate(
       reference_date = as.Date(reference_date),
       target_end_date = as.Date(target_end_date)
     )
-  dplyr::bind_rows(daily_quantile, daily_sample) |>
-    expect_equal(daily_outputs[["ensemble"]])
+  expect_equal(
+    dplyr::bind_rows(daily_quantile, daily_sample) |>
+      dplyr::arrange(target, location, horizon, output_type_id),
+    daily_outputs[["ensemble"]] |>
+      dplyr::arrange(target, location, horizon, output_type_id)
+  )
 
   weekly_quantile <- weekly_outputs[["baselines"]] |>
     dplyr::filter(output_type == "quantile") |>
@@ -213,14 +224,23 @@ test_that("ensemble is correctly calculated", {
     dplyr::mutate(
       reference_date = as.Date(reference_date),
     )
+  set.seed(1234)
   weekly_sample <- weekly_outputs[["baselines"]] |>
     dplyr::filter(output_type == "sample") |>
-    dplyr::mutate(
-      output_type_id = as.integer(factor(paste0(model_id, output_type_id))),
+    hubEnsembles::linear_pool(
       model_id = "UMass-trends_ensemble",
+      compound_taskid_set = c("location", "reference_date", "target"),
+      derived_tasks = "target_end_date",
+      n_output_samples = 1000
+    ) |>
+    dplyr::mutate(
       reference_date = as.Date(reference_date),
       target_end_date = as.Date(target_end_date)
     )
-  dplyr::bind_rows(weekly_quantile, weekly_sample) |>
-    expect_equal(weekly_outputs[["ensemble"]])
+  expect_equal(
+    dplyr::bind_rows(weekly_quantile, weekly_sample) |>
+      dplyr::arrange(target, location, horizon, output_type_id),
+    weekly_outputs[["ensemble"]] |>
+      dplyr::arrange(target, location, horizon, output_type_id)
+  )
 })
