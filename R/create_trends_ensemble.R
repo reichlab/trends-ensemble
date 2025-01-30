@@ -142,9 +142,13 @@ create_trends_ensemble <- function(component_variations,
           model_id = "UMass-trends_ensemble"
         )
       } else if (type == "sample") {
+        set.seed(seed)
         hubEnsembles::linear_pool(
           split_outputs,
-          model_id = "UMass-trends_ensemble"
+          model_id = "UMass-trends_ensemble",
+          compound_taskid_set = c("location", "reference_date", "target"),
+          derived_tasks = "target_end_date",
+          n_output_samples = n_samples
         )
       }
     }) |>
