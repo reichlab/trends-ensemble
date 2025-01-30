@@ -43,17 +43,17 @@ save_model_out_tbl <- function(model_out_tbl, round_id_col = "reference_date", p
 
   # save all the component models in hub verse format
   model_names |>
-    purrr::walk(.f = function(model_id) {
-      model_folder <- file.path(path, model_id)
+    purrr::walk(.f = function(model) {
+      model_folder <- file.path(path, model)
       if (!file.exists(model_folder)) dir.create(model_folder, recursive = TRUE)
 
       results_path <- file.path(
         model_folder,
-        paste0(round_id_value, "-", model_id, ".", extension)
+        paste0(round_id_value, "-", model, ".", extension)
       )
 
       model_outputs <- model_out_tbl |>
-        dplyr::filter(.data[["model_id"]] == model_id) |>
+        dplyr::filter(.data[["model_id"]] == model) |>
         dplyr::select(-"model_id")
 
       if (extension == "csv") {
