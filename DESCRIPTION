@@ -46,6 +46,8 @@ Suggests:
     car,
     fabletools,
     feasts,
+    fs,
     lubridate,
-    testthat (>= 3.2.1)
+    testthat (>= 3.2.1),
+    withr
 Config/testthat/edition: 3
