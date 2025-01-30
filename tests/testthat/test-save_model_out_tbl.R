@@ -58,7 +58,7 @@ test_that("Invalid extension throws an error", {
 
 test_that("Capitalized valid extension does not throw an error", {
   model_outputs |>
-    save_model_out_tbl(round_id_col = "reference_date", path = tempdir(), extension = "PARQUET") |>
+    save_model_out_tbl(round_id_col = "reference_date", path = withr::local_tempdir(), extension = "PARQUET") |>
     expect_no_error()
 })
 
